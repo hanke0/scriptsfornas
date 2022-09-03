@@ -19,6 +19,10 @@ fi
 
 dest="${PARAMS[${#PARAMS[@]} - 1]}"
 
+if [ ! -e "$dest" ]; then
+    mkdir -p "$dest"
+fi
+
 if [ ! -d "$dest" ]; then
     echo >&2 "destination is not a folder: $dest"
     exit 1
@@ -36,7 +40,7 @@ do_link_folder() {
             continue
         fi
         if [ -f "$f" ]; then
-            ln -i "$f" "$linkfilder/$base"
+            ln -i "$f" "$linkfolder/$base"
         fi
     done
 }
