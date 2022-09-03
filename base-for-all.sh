@@ -73,3 +73,8 @@ vexec() {
     printf "\n"
     "$@"
 }
+
+# real_wsl_path_to_win_path gets the real input path and transforms it from the wsl '/mnt/c/...' sytle to 'C:\...' style.
+real_wsl_path_to_win_path() {
+    realpath "$1" | sed -E 's#^/mnt/([a-zA-Z])/#\U\1:\\#g' | tr / \\\\
+}
