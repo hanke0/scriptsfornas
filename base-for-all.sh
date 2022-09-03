@@ -6,6 +6,7 @@
 # A long option with equal sign accepts a value.
 # Values will be set to UPPER long option.
 # A option without equal sign will be set to 1.
+# Postional arguments stores at PARAMS.
 getopt_from_usage() {
     PARAMS=()
     local line short long optarg evalstring matchstring varname casestring helpstring
@@ -55,4 +56,20 @@ EOF
     while [ $# -gt 0 ]; do
         eval "$evalstring"
     done
+}
+
+vexec() {
+    local i
+    for i in "$@"; do
+        case "-$i-" in
+        -*[[:blank:]]*-)
+            printf "'%s' " "$i"
+            ;;
+        *)
+            printf "%s " "$i"
+            ;;
+        esac
+    done
+    printf "\n"
+    "$@"
 }
