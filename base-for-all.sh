@@ -78,3 +78,28 @@ vexec() {
 real_wsl_path_to_win_path() {
     realpath "$1" | sed -E 's#^/mnt/([a-zA-Z])/#\U\1:\\#g' | tr / \\\\
 }
+
+videoext=(
+    mkv mp4 avi rm rmbv mts m2ts ts webm flv vob ogv ogg drc mov qt wmv
+    mepg mpg m2v m3v svi 3go f4v
+)
+
+filename_ext() {
+    echo "${1##*.}"
+}
+
+filename_base() {
+    local filename="$(basename "$1")"
+    echo "${filename%.*}"
+}
+
+is_video_file() {
+    local ext fext
+    fext="$(filename_ext "$1")"
+    for ext in "${videoext[@]}"; do
+        if [ "$ext" = "$fext" ]; then
+            return 0
+        fi
+    done
+    return 1
+}

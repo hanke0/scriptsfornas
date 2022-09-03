@@ -2,11 +2,6 @@
 
 set -e
 
-videoext=(
-    mkv mp4 avi rm rmbv mts m2ts ts webm flv vob ogv ogg drc mov qt wmv
-    mepg mpg m2v m3v svi 3go f4v
-)
-
 usage="
 Usage: ${0##*/} [OPTION]... [FOLDER]
 Remove all folder contains no vidoe files.
@@ -41,22 +36,10 @@ if [ ! -d "$TRASH" ]; then
     echo >&2 "bad trash folder: $TRASH"
 fi
 
-is_video_ext() {
-    local ext
-    for ext in "${videoext[@]}"; do
-        if [ "$ext" = "$1" ]; then
-            return 0
-        fi
-    done
-    return 1
-}
-
 no_video_or_folder() {
-    local ext f
     for f in "$1"/*; do
         [ ! -f "$f" ] && return 1
-        ext="${f##*.}"
-        if is_video_ext "$ext"; then
+        if is_video_file "$f"; then
             return 1
         fi
     done
