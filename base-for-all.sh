@@ -13,7 +13,7 @@ getopt_from_usage() {
     helpstring="$1"
     shift
     while IFS=$'\n' read -r line; do
-        if [[ "$line" =~ [[:space:]]+(-[a-z])?[[:space:]]*(--[a-z]+)(=([A-Z]+))? ]]; then
+        if [[ "$line" =~ [[:space:]]+(-[a-z])?[[:space:],]*(--[a-z\-]+)(=([A-Z]+))? ]]; then
             short="${BASH_REMATCH[1]}"
             long="${BASH_REMATCH[2]}"
             optarg="${BASH_REMATCH[4]}"
@@ -24,6 +24,7 @@ getopt_from_usage() {
             fi
             varname="${long#--*}"  # trim --
             varname="${varname^^}" # upper
+            varname="${varname/-/_}" # replace - to _
             if [ -z $optarg ]; then
                 casestring="    $varname=1; shift 1"
             else
