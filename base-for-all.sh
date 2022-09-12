@@ -22,8 +22,8 @@ getopt_from_usage() {
             else
                 matchstring="$short|$long)"
             fi
-            varname="${long#--*}"  # trim --
-            varname="${varname^^}" # upper
+            varname="${long#--*}"    # trim --
+            varname="${varname^^}"   # upper
             varname="${varname/-/_}" # replace - to _
             if [ -z $optarg ]; then
                 casestring="    $varname=1; shift 1"
@@ -57,6 +57,13 @@ EOF
     while [ $# -gt 0 ]; do
         eval "$evalstring"
     done
+}
+
+# Test if the option variable has set.
+# Input Variable name
+# Output bool true if option value has set.
+option_has_set() {
+    eval "test ! -z \${$1+x}"
 }
 
 vexec() {
