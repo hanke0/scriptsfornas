@@ -15,6 +15,9 @@ for file in "${PARAMS[@]}"; do
     cat >"$file" <<EOF
 #!/usr/bin/env bash
 
+set -e
+set -o pipefail
+
 usage="
 Usage: \${0##*/} [OPTION]...
 XXX
