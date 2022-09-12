@@ -15,7 +15,7 @@ OPTION:
 getopt_from_usage "$usage" "$@"
 
 if ! option_has_set "SUFFIX"; then
-    SUFFIX="utf8"
+    SUFFIX=""
 fi
 
 require_basic_commands
