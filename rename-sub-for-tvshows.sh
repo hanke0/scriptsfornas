@@ -19,7 +19,7 @@ find_eposide() {
 }
 
 find_sub_language() {
-    grep -i -o -E '(ch|zh|en|简体|英文)[^\.]*\.[a-z]+$' < <(basename "$1") | sed -E 's/\..+$//g'
+    grep -i -o -E '(ch|zh|en|简体|英文)[^\.]+\.[a-z]+$' < <(basename "$1") | sed -E 's/\..+$//g'
 }
 
 rename_an_eposide() {
@@ -28,7 +28,7 @@ rename_an_eposide() {
     local folder="$(dirname "$epfile")"
     local epbase="$(basename "$epfile")"
     local ep="$(find_eposide "$epfile")"
-    local sub nsub subfoler
+    local sub tosub subfoler sublang
     if [ -z "$ep" ]; then
         return
     fi
@@ -39,9 +39,14 @@ rename_an_eposide() {
     fi
     find "$subfolder" \( -iname "*${ep}*.srt" -o -iname "*${ep}*.ass" \) -print0 |
         while IFS= read -r -d '' sub; do
-            nsub="$(filename_base "$epfile").$(find_sub_language "$sub").$(filename_ext "$sub")"
-            if [ "$nsub" != "$(basename "$sub")" ]; then
-                mv $MVOPTION "$sub" "$folder/$nsub" </dev/tty
+            sublang="$(find_sub_language "$sub")"
+            if [ -z "sublang" ]; then
+                tosub="$(filename_base "$epfile").$(filename_ext "$sub")"
+            else
+                tosub="$(filename_base "$epfile").$sublang.$(filename_ext "$sub")"
+            fi
+            if [ "$tosub" != "$(basename "$sub")" ]; then
+                mv $MVOPTION "$sub" "$folder/$tosub" </dev/tty
             fi
         done
 }
