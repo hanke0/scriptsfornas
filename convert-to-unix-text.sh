@@ -18,6 +18,9 @@ if ! option_has_set "SUFFIX"; then
     SUFFIX="utf8"
 fi
 
+require_basic_commands
+require_command iconv dos2unix dirname
+
 chardet() {
     if ! uchardet "$1"; then
         exit 1

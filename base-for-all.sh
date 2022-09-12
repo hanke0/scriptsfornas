@@ -111,3 +111,17 @@ is_video_file() {
     done
     return 1
 }
+
+require_command() {
+    local c
+    for c in "$@"; do
+        if ! command -v "$c" >/dev/null; then
+            echo >&2 "command $c must installed, try 'sudo apt install $c' or 'sudo yum install $c'"
+            exit 1
+        fi
+    done
+}
+
+require_basic_commands() {
+    require_command find grep awk sed mkdir dirname realpath ps ln echo printf eval test ls
+}

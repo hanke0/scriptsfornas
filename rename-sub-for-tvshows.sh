@@ -12,6 +12,7 @@ OPTION:
 . "/home/kehan/codes/scriptsfornas/base-for-all.sh"
 
 getopt_from_usage "$usage" "$@"
+require_basic_commands
 
 find_eposide() {
     grep -i -o 'S[0-9][0-9]E[0-9][0-9]' < <(basename "$1")

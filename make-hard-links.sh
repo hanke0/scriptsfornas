@@ -12,6 +12,9 @@ OPTION:
 
 getopt_from_usage "$usage" "$@"
 
+require_basic_commands
+require_command ln mkdir dirname
+
 if [ "${#PARAMS[@]}" -lt 2 ]; then
     ${0} -h
     exit 1

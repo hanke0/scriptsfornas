@@ -26,6 +26,7 @@ OPTION:
 . "$(dirname "$(realpath "\$0")")/base-for-all.sh"
 
 getopt_from_usage "\$usage" "\$@"
+require_basic_commands
 
 EOF
     chmod +x "$file"

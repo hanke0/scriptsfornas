@@ -13,6 +13,7 @@ OPTION:
 . "$(dirname "$(realpath "$0")")/base-for-all.sh"
 
 getopt_from_usage "$usage" "$@"
+require_basic_commands
 
 FOLDER="${PARAMS[0]}"
 if [ -z "$FOLDER" ]; then
