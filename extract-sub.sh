@@ -5,7 +5,7 @@ set -o pipefail
 
 usage="
 Usage: ${0##*/} [OPTION]...
-Deeply extract compressed files into one folder.
+Deeply extract compressed files, that contains sub titles, into one folder.
 
 OPTION:
     -d, --destination=PATH    extract into folder
@@ -27,10 +27,10 @@ extract() {
     case "$1" in
     *.rar)
         require_command unrar
-        unrar -x "$1"
+        unrar e -y -c- -inul "$1" "$DESTINATION"
         ;;
     *.zip)
-        unzip -n -d "$DESTINATION" "$1"
+        unzip -j -qq -o -d "$DESTINATION" "$1"
         ;;
     *.tar.*)
         tar -xf --directory "$DESTINATION" "$1"
