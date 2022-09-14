@@ -21,6 +21,11 @@ if [ -z "$DURATION" ]; then
     DURATION=0
 fi
 
+if [[ ! "$DURATION" =~ \-?[0-9]+ ]]; then
+    echo >&2 "bad shift duration $DURATION"
+    exit 1
+fi
+
 add_duration() {
     local hour minute sec msec style duration
     style="$1"
