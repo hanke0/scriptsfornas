@@ -66,7 +66,7 @@ adjust_line() {
     local prefix start1 start2 start3 start4 start end1 end2 end3 end4 end suffix
     local sep="[:.,\\-]"
     local num="[0-9]+"
-    local assre="^Dialogue:[[:space:]]*(.+),($num)$sep($num)$sep($num)$sep($num),($num)$sep($num)$sep($num)$sep($num)(.*)"
+    local assre="^Dialogue:[[:space:]]*([^,]*),($num)$sep($num)$sep($num)$sep($num),($num)$sep($num)$sep($num)$sep($num)(.*)"
     # ass Dialogue: 0,0:04:55.05,0:04:59.55,
     if [[ "$1" =~ $assre ]]; then
         prefix="${BASH_REMATCH[1]}"
