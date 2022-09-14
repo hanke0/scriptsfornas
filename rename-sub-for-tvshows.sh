@@ -19,7 +19,7 @@ find_eposide() {
 }
 
 find_sub_language() {
-    grep -i -o -E '(ch|zh|en|简体|英文)[^\.]+\.[a-z]+$' < <(basename "$1") | sed -E 's/\..+$//g'
+    grep -i -o -E '(ch|zh|en|简|英)[^\.]+\.[a-z]+$' < <(basename "$1") | sed -E 's/\..+$//g'
 }
 
 rename_an_eposide() {
