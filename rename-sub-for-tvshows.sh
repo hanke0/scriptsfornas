@@ -40,7 +40,7 @@ rename_an_eposide() {
     find "$subfolder" \( -iname "*${ep}*.srt" -o -iname "*${ep}*.ass" \) -print0 |
         while IFS= read -r -d '' sub; do
             sublang="$(find_sub_language "$sub")"
-            if [ -z "sublang" ]; then
+            if [ -z "$sublang" ]; then
                 tosub="$(filename_base "$epfile").$(filename_ext "$sub")"
             else
                 tosub="$(filename_base "$epfile").$sublang.$(filename_ext "$sub")"
