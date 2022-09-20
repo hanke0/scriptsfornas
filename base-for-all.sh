@@ -55,6 +55,12 @@ esac
 EOF
     )"
     while [ $# -gt 0 ]; do
+        # supporting using -- to skip option parse
+        if [ "$1" == "--" ]; then
+            shift 1
+            PARAMS+=("$@")
+            break
+        fi
         eval "$evalstring"
     done
 }
