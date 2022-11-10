@@ -9,7 +9,7 @@ Change container config base on jq.
 
 OPTION:
     -d --directory=PATH   directory of docker container config (default to /var/lib/docker/containers)
-    -i --inplce           inplace the original file.
+    -i --inplace          inplace the original file.
     -H, --host=ADDRESS    docker daemon socket(s) to connect to
 "
 
@@ -48,6 +48,7 @@ change_one() {
     else
         data="$(jq -c "${FILTER}" "${config}")"
         echo "$data" >"${config}"
+        echo "${config}"
     fi
 }
 
