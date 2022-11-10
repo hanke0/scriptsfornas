@@ -9,7 +9,7 @@ OPTION:
     -s --subfolder=DIRECTORY     folder to find sub
 "
 
-. "/home/kehan/codes/scriptsfornas/base-for-all.sh"
+. "$(dirname "$(realpath "$0")")/base-for-all.sh"
 
 getopt_from_usage "$usage" "$@"
 require_basic_commands
