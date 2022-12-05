@@ -2,10 +2,10 @@
 
 usage="
 Usage: ${0##*/} [OPTION]... [files]... dest_directory
-Make windows hard links files using wsl.
+Extend ln support directory.
 
 OPTION:
-    
+
 "
 
 . "$(dirname "$(realpath "$0")")/base-for-all.sh"
@@ -31,6 +31,10 @@ if [ ! -d "$dest" ]; then
     exit 1
 fi
 
+lnfile() {
+    ln --interactive --logical --physical --no-target-directory "$@"
+}
+
 do_link_folder() {
     local target="$1"
     local linkfolder="$2"
@@ -43,7 +47,7 @@ do_link_folder() {
             continue
         fi
         if [ -f "$f" ]; then
-            ln -i "$f" "$linkfolder/$base"
+            lnfile "$f" "$linkfolder/$base"
         fi
     done
 }
@@ -54,5 +58,5 @@ for file in "${PARAMS[@]:0:${#PARAMS[@]}-1}"; do
         do_link_folder "$file" "$dest"
         continue
     fi
-    ln -i "$file" "$dest/$filename"
+    lnfile "$file" "$dest/$filename"
 done
