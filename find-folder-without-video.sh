@@ -43,6 +43,5 @@ find_folder_without_video() {
 }
 
 find "$FOLDER" -type d -print0 | while IFS= read -r -d '' fold; do
-    [[ "$fold" =~ ^"$TRASH" ]] && continue
     find_folder_without_video "$fold"
 done
