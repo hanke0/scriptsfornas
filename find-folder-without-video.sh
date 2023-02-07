@@ -8,12 +8,17 @@ Find all folder contains no vidoe files.
 If NO folder input, default to working directory.
 
 OPTION:
+  -d --depth=DEPTH      depth of folder(default to 1).
 "
 
 . "$(dirname "$(realpath "$0")")/base-for-all.sh"
 
 getopt_from_usage "$usage" "$@"
 require_basic_commands
+
+if [ -z "$DEPTH" ]; then
+    DEPTH=1
+fi
 
 FOLDER="${PARAMS[0]}"
 if [ -z "$FOLDER" ]; then
@@ -27,9 +32,9 @@ if [ ! -d "$FOLDER" ]; then
 fi
 
 no_video_or_folder() {
-    for f in "$1"/*; do
-        [ ! -f "$f" ] && return 1
-        if is_video_file "$f"; then
+    local file
+    find "$1" -type f -print0 | while IFS= read -r -d '' file; do
+        if is_video_file "$file"; then
             return 1
         fi
     done
@@ -42,6 +47,6 @@ find_folder_without_video() {
     fi
 }
 
-find "$FOLDER" -type d -print0 | while IFS= read -r -d '' fold; do
+find "$FOLDER" -maxdepth "$DEPTH" -type d -print0 | while IFS= read -r -d '' fold; do
     find_folder_without_video "$fold"
 done
