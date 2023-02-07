@@ -32,13 +32,11 @@ if [ ! -d "$FOLDER" ]; then
 fi
 
 no_video_or_folder() {
-    local file
     find "$1" -type f -print0 | while IFS= read -r -d '' file; do
         if is_video_file "$file"; then
             return 1
         fi
     done
-    return 0
 }
 
 find_folder_without_video() {
