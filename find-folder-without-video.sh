@@ -4,11 +4,10 @@ set -e
 
 usage="
 Usage: ${0##*/} [OPTION]... [FOLDER]
-Remove all folder contains no vidoe files.
+Find all folder contains no vidoe files.
 If NO folder input, default to working directory.
 
 OPTION:
-    -t --trash=PATH     set the trash folder. defult to [FOLDER]/deleted
 "
 
 . "$(dirname "$(realpath "$0")")/base-for-all.sh"
@@ -27,16 +26,6 @@ if [ ! -d "$FOLDER" ]; then
     exit 1
 fi
 
-if [ -z "$TRASH" ]; then
-    TRASH="$FOLDER/deleted"
-fi
-if [ ! -e "$TRASH" ]; then
-    mkdir -p "$TRASH"
-fi
-if [ ! -d "$TRASH" ]; then
-    echo >&2 "bad trash folder: $TRASH"
-fi
-
 no_video_or_folder() {
     for f in "$1"/*; do
         [ ! -f "$f" ] && return 1
@@ -47,15 +36,13 @@ no_video_or_folder() {
     return 0
 }
 
-remove_folder_without_video() {
+find_folder_without_video() {
     if no_video_or_folder "$1"; then
-        echo "FIND: $1"
-        mkdir -p "$TRASH/$1"
-        mv "$1" "$TRASH/$1"
+        echo "$1"
     fi
 }
 
 find "$FOLDER" -type d -print0 | while IFS= read -r -d '' fold; do
     [[ "$fold" =~ ^"$TRASH" ]] && continue
-    remove_folder_without_video "$fold"
+    find_folder_without_video "$fold"
 done
