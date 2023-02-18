@@ -25,6 +25,7 @@ OPTION:
 
 getopt_from_usage "$usage" "$@"
 require_basic_commands
+require_command python3
 
 pyscript="$(
     cat <<EOF
