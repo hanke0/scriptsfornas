@@ -24,6 +24,7 @@ OPTION:
     -n --name=STRING          daemon name (default to \$basenameofexec)
 "
 
+# shellcheck source=/dev/null
 . "$(dirname "$(realpath "$0")")/base-for-all.sh"
 
 getopt_from_usage "$usage" "$@"
@@ -36,9 +37,9 @@ pidofproc() {
 
     if [ -n "${pidfile:-}" ]; then
         if [ -r "$pidfile" ]; then
-            read -r pid<"$pidfile"
+            read -r pid <"$pidfile"
             if [ -n "${pid:-}" ]; then
-                if $(kill -0 "${pid:-}" 2>/dev/null); then
+                if kill -0 "${pid:-}" 2>/dev/null; then
                     echo "$pid"
                     return 0
                 elif ps "${pid:-}" >/dev/null 2>&1; then
@@ -52,8 +53,8 @@ pidofproc() {
             return 4 # pid file not readable, hence status is unknown.
         fi
     fi
-    pid="$(ps -ef | grep -v grep | grep "$pattern" | awk '{print $2}')"
-    echo "*** $pid"
+    # shellcheck disable=SC2009
+    pid="$(ps -axo pid=,command= | grep -v grep | grep "$pattern" | awk '{print $2}')"
     if [ -z "$pid" ]; then
         return 3 # program is not running
     fi
@@ -61,7 +62,6 @@ pidofproc() {
     return 0
 }
 
-COMMAND="${PARAMS[0]}"
 PARAMS=("${PARAMS[@]:1}")
 EXECNAME="${PARAMS[0]}"
 BASEEXEC="${EXECNAME##*/}"
@@ -108,11 +108,11 @@ start_daemon() {
 
 stop_daemon() {
     local pid
-    pid="$(pidofproc "$PIDFILE" "$PATTERN" || true)"
+    pid="$(pidofproc "$PIDFILE" "$NAME" || true)"
     if [ -z "$pid" ]; then
         return 0
     fi
-    kill -$SIGNAL $pid
+    kill "-$SIGNAL" "$pid"
 }
 
 status_daemon() {

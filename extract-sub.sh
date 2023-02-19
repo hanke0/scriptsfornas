@@ -1,5 +1,7 @@
 #!/usr/bin/env bash
 
+set -e
+
 usage="
 Usage: ${0##*/} [OPTION]...
 Deeply extract compressed files, that contains sub titles, into one folder.
@@ -8,6 +10,7 @@ OPTION:
     -d, --destination=PATH    extract into folder
 "
 
+# shellcheck source=/dev/null
 . "$(dirname "$(realpath "$0")")/base-for-all.sh"
 
 getopt_from_usage "$usage" "$@"

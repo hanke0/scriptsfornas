@@ -9,6 +9,7 @@ OPTION:
     -s --subfolder=DIRECTORY     folder to find sub
 "
 
+# shellcheck source=/dev/null
 . "$(dirname "$(realpath "$0")")/base-for-all.sh"
 
 getopt_from_usage "$usage" "$@"
@@ -23,12 +24,10 @@ find_sub_language() {
 }
 
 rename_an_eposide() {
-    sublist=()
-    local epfile="$1"
-    local folder="$(dirname "$epfile")"
-    local epbase="$(basename "$epfile")"
-    local ep="$(find_eposide "$epfile")"
-    local sub tosub subfoler sublang
+    local epfile folder ep sub tosub sublang
+    epfile="$1"
+    folder="$(dirname "$epfile")"
+    ep="$(find_eposide "$epfile")"
     if [ -z "$ep" ]; then
         return
     fi
@@ -46,7 +45,7 @@ rename_an_eposide() {
                 tosub="$(filename_base "$epfile").$sublang.$(filename_ext "$sub")"
             fi
             if [ "$tosub" != "$(basename "$sub")" ]; then
-                mv $MVOPTION "$sub" "$folder/$tosub" </dev/tty
+                mv "$sub" "$folder/$tosub"
             fi
         done
 }

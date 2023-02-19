@@ -11,6 +11,7 @@ OPTION:
   -d --depth=DEPTH      depth of folder(default to 1).
 "
 
+# shellcheck source=/dev/null
 . "$(dirname "$(realpath "$0")")/base-for-all.sh"
 
 getopt_from_usage "$usage" "$@"

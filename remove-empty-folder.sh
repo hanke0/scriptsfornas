@@ -10,6 +10,7 @@ OPTION:
     -t --trash=PATH     set the trash folder. defult to [FOLDER]/deleted
 "
 
+# shellcheck source=/dev/null
 . "$(dirname "$(realpath "$0")")/base-for-all.sh"
 
 getopt_from_usage "$usage" "$@"

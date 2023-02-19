@@ -12,6 +12,7 @@ OPTION:
     -d --duration=Miliseconds    shift duration (default to 0).
 "
 
+# shellcheck source=/dev/null
 . "$(dirname "$(realpath "$0")")/base-for-all.sh"
 
 getopt_from_usage "$usage" "$@"
@@ -34,22 +35,22 @@ add_duration() {
     sec="$4"
     msec="$5"
 
-    if [ $style = ass ]; then
+    if [ "$style" = ass ]; then
         msec="$((10#$msec * 10))"
     fi
 
     duration="$(((10#$hour * 3600 + 10#$minute * 60 + 10#$sec) * 1000 + 10#$msec + 10#$DURATION))"
 
-    hour="$(($duration / 3600000))"
-    duration="$(($duration % 3600000))"
-    minute="$(($duration / 60000))"
-    duration="$(($duration % 60000))"
-    sec="$(($duration / 1000))"
-    msec="$(($duration % 1000))"
+    hour="$((10#$duration / 3600000))"
+    duration="$((10#$duration % 3600000))"
+    minute="$((10#$duration / 60000))"
+    duration="$((10#$duration % 60000))"
+    sec="$((10#$duration / 1000))"
+    msec="$((10#$duration % 1000))"
 
     case "$style" in
     ass)
-        printf "%d:%02d:%02d.%02d" "$hour" "$minute" "$sec" "$(($msec / 10))"
+        printf "%d:%02d:%02d.%02d" "$hour" "$minute" "$sec" "$((10#$msec / 10))"
         ;;
     srt)
         printf "%02d:%02d:%02d,%03d" "$hour" "$minute" "$sec" "$msec"
@@ -113,7 +114,7 @@ adjust_file() {
         output="/dev/stdout"
     fi
     if [ -f "$output" ]; then
-        printf "$output exist overwrite it? [Y/n]"
+        printf "%s" "$output exist overwrite it? [Y/n]"
         ans=
         read -r ans
         case "$ans" in

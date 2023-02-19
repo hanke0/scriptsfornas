@@ -12,6 +12,7 @@ OPTION:
     -n --noexec        show commands instead of executing them.
 "
 
+# shellcheck source=/dev/null
 . "$(dirname "$(realpath "$0")")/base-for-all.sh"
 
 getopt_from_usage "$usage" "$@"
@@ -43,7 +44,7 @@ fi
 if [ -z "$YES" ]; then
     do_move() {
         local ans
-        printf '%s ' "mv $@ [Y/n]:"
+        printf '%s ' "mv" "$@" "[Y/n]:"
         read -r ans
 
         case "$ans" in
@@ -62,6 +63,7 @@ else
 fi
 
 getto() {
+    # shellcheck disable=SC2016
     sed -E 's/\$([0-9]+)/${BASH_REMATCH[\1]}/g' <<<"$1"
 }
 CTO="$(getto "$TO")"

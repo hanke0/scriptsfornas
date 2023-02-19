@@ -11,6 +11,7 @@ OPTION:
     -m --max=SIZE        set default max size(default to 64M)
 "
 
+# shellcheck source=/dev/null
 . "$(dirname "$(realpath "$0")")/base-for-all.sh"
 
 getopt_from_usage "$usage" "$@"

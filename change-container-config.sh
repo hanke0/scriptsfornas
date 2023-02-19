@@ -14,6 +14,7 @@ OPTION:
 "
 
 DIRECTORY=/var/lib/docker/containers
+# shellcheck source=/dev/null
 . "$(dirname "$(realpath "$0")")/base-for-all.sh"
 
 getopt_from_usage "$usage" "$@"

@@ -25,7 +25,7 @@ getopt_from_usage() {
             varname="${long#--*}"    # trim --
             varname="${varname^^}"   # upper
             varname="${varname/-/_}" # replace - to _
-            if [ -z $optarg ]; then
+            if [ -z "$optarg" ]; then
                 casestring="    $varname=1; shift 1"
             else
                 casestring="    $varname=\"\$2\"; shift 2"
@@ -103,7 +103,8 @@ filename_ext() {
 }
 
 filename_base() {
-    local filename="$(basename "$1")"
+    local filename
+    filename="$(basename "$1")"
     echo "${filename%.*}"
 }
 
