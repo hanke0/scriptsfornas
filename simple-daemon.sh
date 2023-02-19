@@ -12,8 +12,6 @@ COMMAND
     stop
     status
     restart
-    reload
-    force-reload
 
 OPTION:
     -b --basedir=DIR          base directory of pidfile and (logfile default to /var).
@@ -62,6 +60,7 @@ pidofproc() {
     return 0
 }
 
+COMMAND="${PARAMS[0]}"
 PARAMS=("${PARAMS[@]:1}")
 EXECNAME="${PARAMS[0]}"
 BASEEXEC="${EXECNAME##*/}"
@@ -109,6 +108,7 @@ start_daemon() {
 stop_daemon() {
     local pid
     pid="$(pidofproc "$PIDFILE" "$NAME" || true)"
+    rm -f "$PIDFILE"
     if [ -z "$pid" ]; then
         return 0
     fi
