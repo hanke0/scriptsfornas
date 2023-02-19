@@ -54,7 +54,7 @@ pidofproc() {
         fi
     fi
     # shellcheck disable=SC2009
-    pid="$(ps -axo pid=,command= | grep -v grep | grep "$pattern" | awk '{print $2}')"
+    pid="$(ps -axo pid=,command= | grep -v grep | grep "$pattern" | awk '{print $1}')"
     if [ -z "$pid" ]; then
         return 3 # program is not running
     fi
