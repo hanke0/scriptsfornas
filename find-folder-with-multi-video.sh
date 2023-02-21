@@ -4,11 +4,12 @@ set -e
 
 usage="
 Usage: ${0##*/} [OPTION]... [FOLDER]
-Find all folder contains no vidoe files.
+Find all folder contains multi(more than 1) vidoe files.
 If NO folder input, default to working directory.
 
 OPTION:
   -d --depth=DEPTH      depth of folder(default to 1).
+  -m --minium           minium video (default 1, must contains at least 2).
 "
 
 # shellcheck source=/dev/null
@@ -16,9 +17,14 @@ OPTION:
 
 getopt_from_usage "$usage" "$@"
 require_basic_commands
+require_command wc
 
 if [ -z "$DEPTH" ]; then
     DEPTH=1
+fi
+
+if [ -z "$MINIUM" ]; then
+    MINIUM=1
 fi
 
 FOLDER="${PARAMS[0]}"
@@ -32,12 +38,14 @@ if [ ! -d "$FOLDER" ]; then
     exit 1
 fi
 
-no_video_or_folder() {
-    test -z "$(find_video_files "$1")"
+videonummatch() {
+    local n
+    n="$(find_video_files "$1" | wc -l)"
+    test "$n" -gt "$MINIUM"
 }
 
 find_folder_without_video() {
-    if no_video_or_folder "$1"; then
+    if videonummatch "$1"; then
         echo "$1"
     fi
 }

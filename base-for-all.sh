@@ -98,6 +98,10 @@ videoext=(
     mepg mpg m2v m3v svi 3go f4v
 )
 
+find_video_files() {
+    find "$@" -type f $(printf -- "-iname '*.%s' -or " "${videoext[@]}") -iname '*.mp4'
+}
+
 filename_ext() {
     echo "${1##*.}"
 }
