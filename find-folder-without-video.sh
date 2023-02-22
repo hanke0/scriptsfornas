@@ -32,12 +32,8 @@ if [ ! -d "$FOLDER" ]; then
     exit 1
 fi
 
-no_video_or_folder() {
-    test -z "$(find_video_files "$1")"
-}
-
 find_folder_without_video() {
-    if no_video_or_folder "$1"; then
+    if [ -z "$(find_video_files "$1")" ]; then
         echo "$1"
     fi
 }

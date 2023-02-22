@@ -98,8 +98,22 @@ videoext=(
     mepg mpg m2v m3v svi 3go f4v
 )
 
+video_find_ext=()
+_setup_video_find_ext() {
+    for i in "${videoext[@]}"; do
+        if [ "${#video_find_ext[@]}" -gt 0 ]; then
+            video_find_ext+=(-o -iname "*.$i")
+        else
+            video_find_ext+=(-iname "*.$i")
+        fi
+
+    done
+}
+_setup_video_find_ext
+unset _setup_video_find_ext
+
 find_video_files() {
-    find "$@" -type f $(printf -- "-iname '*.%s' -or " "${videoext[@]}") -iname '*.mp4'
+    find "$@" -type f \( "${video_find_ext[@]}" \)
 }
 
 filename_ext() {
