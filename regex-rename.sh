@@ -8,7 +8,7 @@ Usage: ${0##*/} [OPTION]... FROM TO [FILE]...
 Rename by regex.
 
 OPTION:
-    -y, --yes           not asking.
+    -y, --yes          not asking.
     -n --noexec        show commands instead of executing them.
 "
 

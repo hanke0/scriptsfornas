@@ -31,6 +31,18 @@ getopt_from_usage() {
                 casestring="    $varname=\"\$2\"; shift 2"
             fi
             evalstring="$(echo -e "$evalstring\n$matchstring\n$casestring\n    ;;\n")"
+
+            if [ -z "$optarg" ]; then
+                continue
+            fi
+            # support --option=value
+            if [ -z "$short" ]; then
+                matchstring="${long}=*)"
+            else
+                matchstring="${short}=*|${long}=*)"
+            fi
+            casestring="    ${varname}=\${1#*=}; shift 1"
+            evalstring="$(echo -e "$evalstring\n$matchstring\n$casestring\n    ;;\n")"
         fi
     done <<EOF
 $helpstring
