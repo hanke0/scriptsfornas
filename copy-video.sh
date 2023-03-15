@@ -5,7 +5,7 @@ set -o pipefail
 
 usage="
 Usage: ${0##*/} [OPTION]... <directory-contains-video> <target-directory>
-Copy all videos to one directory.
+Consolidate all videos into a single directory.
 
 OPTION:
 
