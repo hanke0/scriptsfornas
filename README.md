@@ -1,5 +1,1 @@
-I have built a lot of scripts for media resource management, and now I share it.
-
-All the scripts may run well on BASH, other terminals are not tested. I use GNU bash v5.0, using the same bash would help if you are having problems.
-
-Best for you.
+I have developed several scripts for managing media resources, and I am now sharing them. While the scripts are optimized for BASH, their compatibility with other terminals has not been tested. I personally use GNU bash v5.0, and recommend using the same version to avoid any potential issues. Best wishes.
