@@ -125,7 +125,17 @@ _setup_video_find_ext
 unset _setup_video_find_ext
 
 find_video_files() {
-    find "$@" -type f \( "${video_find_ext[@]}" \)
+    find "$1" -type f \( "${video_find_ext[@]}" \)
+}
+
+find_videos_and_do_callback() {
+    local folder callback file
+    folder="$1"
+    callback="$2"
+
+    while IFS= read -r -d '' file; do
+        "$callback" "$file"
+    done < <(find "$folder" -type f \( "${video_find_ext[@]}" \) -print0)
 }
 
 filename_ext() {
