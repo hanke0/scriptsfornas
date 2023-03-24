@@ -5,7 +5,7 @@ Usage: ${0##*/} [OPTION]... [files]... dest_directory
 Extend ln support directory.
 
 OPTION:
-
+    -j --junk-path              junk paths (do not make directories)
 "
 
 # shellcheck source=/dev/null
@@ -41,8 +41,8 @@ do_link_folder() {
     local linkfolder="$2"
     mkdir -p "$linkfolder"
     local f base
-    for f in "$target"/*; do
-        base="$(basename "$f")"
+    while IFS= read -r -d '' file; do
+            base="$(basename "$f")"
         if [ -d "$f" ]; then
             do_link_folder "$f" "$linkfolder/$base"
             continue
@@ -50,7 +50,7 @@ do_link_folder() {
         if [ -f "$f" ]; then
             lnfile "$f" "$linkfolder/$base"
         fi
-    done
+    done < <(find "$target" -mindepth 1)
 }
 
 for file in "${PARAMS[@]:0:${#PARAMS[@]}-1}"; do
