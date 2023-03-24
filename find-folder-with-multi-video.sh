@@ -8,8 +8,9 @@ Find all folder contains multi(more than 1) vidoe files.
 If NO folder input, default to working directory.
 
 OPTION:
-  -d --depth=DEPTH      depth of folder(default to 1).
-  -m --minium           minium video (default 1, must contains at least 2).
+  -d, --depth=DEPTH      depth of folder(default to 1).
+  -m, --minium           minium video (default 1, must contains at least 2).
+      --nosub            videos in sub folder is ignored.
 "
 
 # shellcheck source=/dev/null
@@ -38,9 +39,14 @@ if [ ! -d "$FOLDER" ]; then
     exit 1
 fi
 
+FIND_OPTIONS=()
+if istrue "${NOSUB:-}"; then
+    FIND_OPTIONS+=("--depth=1")
+fi
+
 videonummatch() {
     local n
-    n="$(find_video_files "$1" | wc -l)"
+    n="$(find_video_files "${FIND_OPTIONS[@]}" "$1" | wc -l)"
     test "$n" -gt "$MINIUM"
 }
 

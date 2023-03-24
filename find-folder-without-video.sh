@@ -8,7 +8,8 @@ Find all folder contains no vidoe files.
 If NO folder input, default to working directory.
 
 OPTION:
-  -d --depth=DEPTH      depth of folder(default to 1).
+  -d, --depth=DEPTH      depth of folder(default to 1).
+      --nosub            videos in sub folder is ignored.
 "
 
 # shellcheck source=/dev/null

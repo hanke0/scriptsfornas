@@ -22,9 +22,9 @@ getopt_from_usage() {
             else
                 matchstring="$short|$long)"
             fi
-            varname="${long#--*}"    # trim --
-            varname="${varname^^}"   # upper
-            varname="${varname/-/_}" # replace - to _
+            varname="${long#--*}"     # trim --
+            varname="${varname^^}"    # upper
+            varname="${varname//-/_}" # replace - to _
             if [ -z "$optarg" ]; then
                 casestring="    $varname=1; shift 1"
             else
@@ -77,6 +77,31 @@ EOF
     done
 }
 
+# parse_option "$@" && shift ${NOPT}
+parse_option() {
+    local key value
+    NOPT=0
+    while [ $# -gt 0 ]; do
+        case "$1" in
+        -*)
+            key="${1%%=*}"
+            key="${1//-/}"
+            if [ "${1//=/}" = "$1" ]; then # --help
+                value=true
+            else # --help=true
+                value="${1#*=}"
+            fi
+            eval "${key}=\"${value}\""
+            NOPT=$((10#$NOPT + 1))
+            shift
+            ;;
+        *)
+            break
+            ;;
+        esac
+    done
+}
+
 # Test if the option variable has set.
 # Input Variable name
 # Output bool true if option value has set.
@@ -124,18 +149,48 @@ _setup_video_find_ext() {
 _setup_video_find_ext
 unset _setup_video_find_ext
 
+istrue() {
+    case "$1" in
+    1 | y | yes | Y | YES | Yes | true | True | TRUE)
+        return
+        ;;
+    *)
+        return 1
+        ;;
+    esac
+}
+
+# find_video_files [--depth <num>] [--print0 <bool>] <folder>
 find_video_files() {
-    find "$1" -type f \( "${video_find_ext[@]}" \)
+    local depth print0
+    __find_video_files_find_prefix_opts=()
+    __find_video_files_find_suffix_opts=()
+    parse_option "$@" && shift ${NOPT}
+    if [ -z "$depth" ]; then
+        __find_video_files_find_prefix_opts+=(-mindepth "$depth" -maxdepth "$depth")
+    fi
+    if istrue "$print0"; then
+        __find_video_files_find_suffix_opts+=(-print0)
+    fi
+
+    find "$1" "${__find_video_files_find_prefix_opts[@]}" \
+        -type f '(' "${video_find_ext[@]}" ')' \
+        "${__find_video_files_find_suffix_opts[@]}"
 }
 
 find_videos_and_do_callback() {
-    local folder callback file
+    local folder callback file depth print0
+    parse_option "$@" && shift ${NOPT}
     folder="$1"
     callback="$2"
+    __find_videos_and_do_callback_options=("--print0")
+    if [ -z "$depth" ]; then
+        __find_videos_and_do_callback_options+=("--depth=$depth")
+    fi
 
-    while IFS= read -r -d '' file; do
+    while IFS= read -r -d '' -u 5 file; do
         "$callback" "$file"
-    done < <(find "$folder" -type f \( "${video_find_ext[@]}" \) -print0)
+    done 5< <(find_video_files "${__find_videos_and_do_callback_options[@]}" "${folder}")
 }
 
 filename_ext() {
