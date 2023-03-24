@@ -41,8 +41,8 @@ do_link_folder() {
     local linkfolder="$2"
     mkdir -p "$linkfolder"
     local f base
-    while IFS= read -r -d '' file; do
-            base="$(basename "$f")"
+    while IFS= read -r -d '' -u 5 f; do
+        base="$(basename "$f")"
         if [ -d "$f" ]; then
             do_link_folder "$f" "$linkfolder/$base"
             continue
@@ -50,7 +50,7 @@ do_link_folder() {
         if [ -f "$f" ]; then
             lnfile "$f" "$linkfolder/$base"
         fi
-    done < <(find "$target" -mindepth 1)
+    done 5< <(find "$target" -mindepth 1 -maxdepth 1 -not -path '*/.*' -print0)
 }
 
 for file in "${PARAMS[@]:0:${#PARAMS[@]}-1}"; do
