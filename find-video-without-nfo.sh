@@ -7,6 +7,7 @@ Usage: ${0##*/} [OPTION]... [FOLDER]
 Find all folder contains a video but nfo file is absent.
 
 OPTION:
+    -d, --directory         output video directory instead of video file path.
 "
 
 # shellcheck source=/dev/null
@@ -35,7 +36,11 @@ dovideo() {
     file="$1"
     path="$(dirname "$file")"
     if [ -z "$(find "$path" -type f -iname "*.nfo")" ]; then
-        echo "$path"
+        if [ "$DIRECTORY" = 1 ]; then
+            echo "$path"
+        else
+            echo "$file"
+        fi
     fi
 }
 
