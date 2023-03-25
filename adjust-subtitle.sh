@@ -84,7 +84,7 @@ adjust_line() {
         start="$(add_duration ass "$start1" "$start2" "$start3" "$start4")"
         end="$(add_duration ass "$end1" "$end2" "$end3" "$end4")"
         echo "Dialogue: $prefix,$start,$end$suffix"
-        return
+        return 0
     fi
 
     local srtre="($num)$sep($num)$sep($num)$sep($num)[[:space:]]*-->[[:space:]]*($num)$sep($num)$sep($num)$sep($num)(.*)"
@@ -102,7 +102,7 @@ adjust_line() {
         start="$(add_duration srt "$start1" "$start2" "$start3" "$start4")"
         end="$(add_duration srt "$end1" "$end2" "$end3" "$end4")"
         echo "$start --> $end$suffix"
-        return
+        return 0
     fi
     echo "$line"
 }
@@ -122,7 +122,7 @@ adjust_file() {
             echo >"$output"
             ;;
         *)
-            return
+            return 0
             ;;
         esac
     fi

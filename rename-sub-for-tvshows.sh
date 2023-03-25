@@ -29,7 +29,7 @@ rename_an_eposide() {
     folder="$(dirname "$epfile")"
     ep="$(find_eposide "$epfile")"
     if [ -z "$ep" ]; then
-        return
+        return 0
     fi
     if [ -z "$SUBFOLDER" ]; then
         subfolder="$folder"
