@@ -22,9 +22,8 @@ XMLQUERY="$(dirname "$(realpath "$0")")/xmlquery.sh"
 
 doone() {
     local file title originaltitle year dest
-    while IFS= read -r -d '' -u 5 file; do
-        :
-    done 5< <(find "$1" -maxdepth 1 -mindepth 1 -type f -name '*.nfo' -print0)
+    IFS= read -r -d '' file \
+        < <(find "$1" -maxdepth 1 -mindepth 1 -type f -name '*.nfo' -print0)
 
     if [ -z "$file" ]; then
         echo >&2 "can not find nfo file: $1"
