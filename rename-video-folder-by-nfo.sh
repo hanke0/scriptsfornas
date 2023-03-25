@@ -61,7 +61,9 @@ doone() {
         dest="$title.$originaltitle.$year"
     fi
     dest="${dest// /.}"
-
+    if [ "$1" = "$dest" ]; then
+        return 0
+    fi
     if ask_yes "mv '$1' '$dest'?[Y/n]" yes; then
         mv "$1" "$dest"
     fi
