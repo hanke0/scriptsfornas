@@ -61,9 +61,11 @@ doone() {
         dest="$title.$originaltitle.$year"
     fi
     dest="${dest// /.}"
-    if [ "$1" = "$dest" ]; then
+    dest="${dest////.}" # replaec / to .
+    if [ "$(basename "$1")" = "$dest" ]; then
         return 0
     fi
+    dest="$(dirname "$1")/$dest"
     if ask_yes "mv '$1' '$dest'?[Y/n]" yes; then
         mv "$1" "$dest"
     fi
