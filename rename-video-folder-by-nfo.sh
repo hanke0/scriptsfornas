@@ -66,13 +66,13 @@ doone() {
         return 0
     fi
     dest="$(dirname "$1")/$dest"
-    jobprompt="mv '$1' '$dest'?[Y/n]"
+    jobprompt="mv '$1' '$dest'"
     if istrue "$YES"; then
         mv "$1" "$dest"
         echo "$jobprompt"
         return 0
     fi
-    if ask_yes "$jobprompt" yes; then
+    if ask_yes "${jobprompt}?[Y/n]" yes; then
         mv "$1" "$dest"
     fi
 }
