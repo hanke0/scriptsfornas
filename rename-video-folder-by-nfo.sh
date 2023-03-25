@@ -62,7 +62,7 @@ doone() {
     fi
     dest="${dest// /.}"
     dest="${dest////.}" # replaec / to .
-    dest="${dest//../.}"
+    dest="$(sed 's/\.\.\.*/./g' <<<"$dest")"
     if [ "$(basename "$1")" = "$dest" ]; then
         return 0
     fi
