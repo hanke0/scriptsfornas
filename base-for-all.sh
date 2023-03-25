@@ -152,7 +152,7 @@ unset _setup_video_find_ext
 istrue() {
     case "$1" in
     1 | y | yes | Y | YES | Yes | true | True | TRUE)
-        return
+        return 0
         ;;
     *)
         return 1
