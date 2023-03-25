@@ -125,6 +125,15 @@ vexec() {
     "$@"
 }
 
+ask_yes() {
+    local answer
+    read -r -p "$1" answer
+    if [ -z "$answer" ]; then
+        answer="$2"
+    fi
+    istrue "$answer"
+}
+
 # real_wsl_path_to_win_path gets the real input path and transforms it from the wsl '/mnt/c/...' sytle to 'C:\...' style.
 real_wsl_path_to_win_path() {
     realpath "$1" | sed -E 's#^/mnt/([a-zA-Z])/#\U\1:\\#g' | tr / \\\\
