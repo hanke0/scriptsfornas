@@ -34,15 +34,15 @@ doone() {
         title="$("$XMLQUERY" 'tvshow.title' "$file")"
     fi
     originaltitle="$("$XMLQUERY" 'movie.originaltitle' "$file")"
-    if [ -z "$tile" ]; then
+    if [ -z "$originaltitle" ]; then
         originaltitle="$("$XMLQUERY" 'tvshow.originaltitle' "$file")"
     fi
     year="$("$XMLQUERY" 'movie.year' "$file")"
-    if [ -z "$tile" ]; then
-        originaltitle="$("$XMLQUERY" 'tvshow.year' "$file")"
+    if [ -z "$year" ]; then
+        year="$("$XMLQUERY" 'tvshow.year' "$file")"
     fi
 
-    if [ -z "$tile" ]; then
+    if [ -z "$title" ]; then
         echo >&2 "can not get title from $file"
         return 0
     fi
@@ -55,10 +55,10 @@ doone() {
         return 0
     fi
 
-    if [ "$tile" = "$originaltitle" ]; then
-        dest="$tile.$year"
+    if [ "$title" = "$originaltitle" ]; then
+        dest="$title.$year"
     else
-        dest="$tile.$originaltitle.$year"
+        dest="$title.$originaltitle.$year"
     fi
     dest="${dest// /.}"
 
