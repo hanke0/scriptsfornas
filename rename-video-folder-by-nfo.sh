@@ -60,9 +60,8 @@ doone() {
     else
         dest="$title.$originaltitle.$year"
     fi
-    dest="${dest// /.}"
-    dest="${dest////.}" # replaec / to .
-    dest="$(sed 's/[\.\-:][\.\-:][\.\-:]*/./g' <<<"$dest")"
+    dest="${dest//[^[:alnum:]]/.}"
+    dest="$(sed 's/\.\.\.*/./g' <<<"$dest")"
     if [ "$(basename "$1")" = "$dest" ]; then
         return 0
     fi
