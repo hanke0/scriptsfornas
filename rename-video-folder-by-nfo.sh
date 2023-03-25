@@ -30,7 +30,7 @@ doone() {
         return 0
     fi
     title="$("$XMLQUERY" 'movie.title' "$file")"
-    if [ -z "$tile" ]; then
+    if [ -z "$title" ]; then
         title="$("$XMLQUERY" 'tvshow.title' "$file")"
     fi
     originaltitle="$("$XMLQUERY" 'movie.originaltitle' "$file")"
