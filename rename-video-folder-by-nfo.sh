@@ -8,7 +8,7 @@ Usage: ${0##*/} [OPTION]... [folder]...
 Rename videos folder by nfo.
 
 OPTION:
-
+    -y, --yes                    do not ask.
 "
 
 # shellcheck source=/dev/null
@@ -21,7 +21,7 @@ require_basic_commands
 XMLQUERY="$(dirname "$(realpath "$0")")/xmlquery.sh"
 
 doone() {
-    local file title originaltitle year dest
+    local file title originaltitle year dest jobprompt
     IFS= read -r -d '' file \
         < <(find "$1" -maxdepth 1 -mindepth 1 -type f -name '*.nfo' -print0)
 
@@ -66,7 +66,13 @@ doone() {
         return 0
     fi
     dest="$(dirname "$1")/$dest"
-    if ask_yes "mv '$1' '$dest'?[Y/n]" yes; then
+    jobprompt="mv '$1' '$dest'?[Y/n]"
+    if istrue "$YES"; then
+        mv "$1" "$dest"
+        echo "$jobprompt"
+        return 0
+    fi
+    if ask_yes "$jobprompt" yes; then
         mv "$1" "$dest"
     fi
 }
