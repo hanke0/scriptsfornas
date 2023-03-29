@@ -175,7 +175,7 @@ find_video_files() {
     __find_video_files_find_prefix_opts=()
     __find_video_files_find_suffix_opts=()
     parse_option "$@" && shift ${NOPT}
-    if [ -z "$depth" ]; then
+    if [ -n "$depth" ]; then
         __find_video_files_find_prefix_opts+=(-mindepth "$depth" -maxdepth "$depth")
     fi
     if istrue "$print0"; then
