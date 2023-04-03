@@ -16,10 +16,6 @@ OPTION:
 getopt_from_usage "$usage" "$@"
 require_basic_commands
 
-if [ -z "$DEPTH" ]; then
-    DEPTH=1
-fi
-
 FOLDER="${PARAMS[0]}"
 if [ -z "$FOLDER" ]; then
     FOLDER="."

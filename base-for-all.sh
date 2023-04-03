@@ -193,7 +193,7 @@ find_videos_and_do_callback() {
     folder="$1"
     callback="$2"
     __find_videos_and_do_callback_options=("--print0")
-    if [ -z "$depth" ]; then
+    if [ -n "$depth" ]; then
         __find_videos_and_do_callback_options+=("--depth=$depth")
     fi
 
