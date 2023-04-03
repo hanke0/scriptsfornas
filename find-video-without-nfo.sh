@@ -38,7 +38,7 @@ hasnfo() {
         fi
         return 1
     fi
-    [ -z "$(find "$path" -type f -iname "*.nfo")" ]
+    [ -n "$(find "$path" -maxdepth 1 -mindepth 1 -type f -iname "*.nfo")" ]
 }
 
 dovideo() {
