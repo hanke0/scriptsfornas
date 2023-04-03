@@ -12,6 +12,8 @@ OPTION:
     -d, --dir-mode              treat all source file as directory.
                                 as result, src/*      -> dst/*
                                            src/path/* -> dst/path/*
+    -e, --ext=EXTENSION         only hard link those file with specific extensions.
+                                many extesions could sperate by ,
 "
 
 # shellcheck source=/dev/null
@@ -35,6 +37,28 @@ if [ ! -d "$DESTINATION" ]; then
     echo >&2 "DESTINATIONination is not a folder: $DESTINATION"
     exit 1
 fi
+EXTENSIONS=()
+setup_extension() {
+    if [ -z "${EXT}" ]; then
+        return 0
+    fi
+    IFS=, read -r -a EXTENSIONS EXTENSIONS <<<"${EXT}"
+}
+setup_extension
+
+ismatchext() {
+    local e target
+    if [ "${#EXTENSIONS[@]}" -eq 0 ]; then
+        return 0
+    fi
+    target="${1##*.}"
+    for e in "${EXTENSIONS[@]}"; do
+        if [ "$target" = "$e" ]; then
+            return 0
+        fi
+    done
+    return 1
+}
 
 is_junk_path() {
     istrue "$JUNK_PATH"
@@ -44,7 +68,13 @@ is_dir_mode() {
 }
 
 lnfile() {
-    ln --interactive --logical --physical --no-target-directory "$@"
+    local src dst
+    src="$1"
+    dst="$2"
+    if ! ismatchext "$src"; then
+        return 0
+    fi
+    ln --interactive --logical --physical --no-target-directory "$src" "$dst"
 }
 
 do_link_folder() {
