@@ -152,7 +152,6 @@ _setup_video_find_ext() {
         else
             video_find_ext+=(-iname "*.$i")
         fi
-
     done
 }
 _setup_video_find_ext
@@ -169,7 +168,7 @@ istrue() {
     esac
 }
 
-# find_video_files [--depth <num>] [--print0 <bool>] <folder>
+# find_video_files [--depth=<num>] [--print0=<bool>] <folder>
 find_video_files() {
     local depth print0
     __find_video_files_find_prefix_opts=()
