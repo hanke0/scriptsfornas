@@ -55,7 +55,7 @@ doone() {
     if [ "$num" -gt 1 ]; then
         dest="$DESTINATION/$MULTI_TO/"
     else
-        dest="$DESTINATION/$actor/"
+        dest="$DESTINATION/${actor//[[:blank:]]/}/"
     fi
     mkdir -p "$dest"
     jobprompt="mv '$1' '$dest'"
