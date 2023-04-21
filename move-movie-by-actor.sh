@@ -27,12 +27,12 @@ require_basic_commands
 XMLQUERY="$(dirname "$(realpath "$0")")/xmlquery.sh"
 
 if istrue "$DRYRUN"; then
-    move() {
+    x() {
         :
     }
 else
-    move() {
-        mv "$@"
+    x() {
+        "$@" "$@"
     }
 fi
 
@@ -57,15 +57,15 @@ doone() {
     else
         dest="$DESTINATION/${actor//[[:blank:]]/}/"
     fi
-    mkdir -p "$dest"
+    x mkdir -p "$dest"
     jobprompt="mv '$1' '$dest'"
     if istrue "$YES"; then
-        move "$1" "$dest"
+        x mv "$1" "$dest"
         echo "$jobprompt"
         return 0
     fi
     if ask_yes "${jobprompt}?[Y/n]" yes; then
-        move "$1" "$dest"
+        x mv "$1" "$dest"
     else
         echo >&2 "user abort"
     fi
