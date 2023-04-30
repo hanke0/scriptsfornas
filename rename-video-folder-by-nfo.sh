@@ -75,8 +75,9 @@ doone() {
     fi
     if ask_yes "${jobprompt}?[Y/n]" yes; then
         mv "$1" "$dest"
+    else
+        echo "abort"
     fi
-    return 0
 }
 
 for folder in "${PARAMS[@]}"; do
