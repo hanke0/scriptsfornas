@@ -76,6 +76,7 @@ doone() {
     if ask_yes "${jobprompt}?[Y/n]" yes; then
         mv "$1" "$dest"
     fi
+    return 0
 }
 
 for folder in "${PARAMS[@]}"; do
