@@ -1,5 +1,12 @@
 #!/usr/bin/env bash
 
+case "$DEBUG" in
+1 | true | TRUR | Y | Yes | YES | yes)
+    set -x
+    ;;
+*) ;;
+esac
+
 # Get options from usage string.
 # Usage: getopt_from_usage usages [arguments]...
 # Treat "-s --long" or "--long" as option arguments
