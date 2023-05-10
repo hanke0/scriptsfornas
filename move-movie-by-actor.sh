@@ -57,6 +57,9 @@ doone() {
     else
         dest="$DESTINATION/${actor//[[:blank:]]/}/"
     fi
+    if samedir "$dest" "$(dirname "$1")"; then
+        return 0
+    fi
     x mkdir -p "$dest"
     jobprompt="mv '$1' '$dest'"
     if istrue "$YES"; then

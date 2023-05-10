@@ -242,3 +242,7 @@ require_command() {
 require_basic_commands() {
     require_command find grep awk sed mkdir dirname realpath ps ln echo printf eval test ls
 }
+
+samedir() {
+    [ "$(realpath "$1")"  = "$(realpath "$2")" ]
+}
