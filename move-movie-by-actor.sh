@@ -32,7 +32,7 @@ if istrue "$DRYRUN"; then
     }
 else
     x() {
-        "$@" "$@"
+        "$@"
     }
 fi
 
