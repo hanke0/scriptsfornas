@@ -193,8 +193,9 @@ find_video_files() {
         "${__find_video_files_find_suffix_opts[@]}"
 }
 
+# find_videos_and_do_callback [--depth=<num>] <folder> <callback>
 find_videos_and_do_callback() {
-    local folder callback file depth print0
+    local folder callback file depth
     parse_option "$@" && shift ${NOPT}
     folder="$1"
     callback="$2"
@@ -244,5 +245,5 @@ require_basic_commands() {
 }
 
 samedir() {
-    [ "$(realpath "$1")"  = "$(realpath "$2")" ]
+    [ "$(realpath "$1")" = "$(realpath "$2")" ]
 }
