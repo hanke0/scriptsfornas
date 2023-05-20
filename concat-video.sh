@@ -31,7 +31,13 @@ if [ -z "$OUTPUT" ]; then
     OUTPUT="concat-output.mkv"
 fi
 
-echo >"filelist.txt"
+if [ -f "filelist.txt" ]; then
+    if ! ask_yes "filelist.txt is exist, overwrite it?"; then
+        exit 1
+    fi
+fi
+
+trap 'rm filelist.txt' EXIT
 
 callback() {
     local video="$1"
