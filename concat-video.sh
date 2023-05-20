@@ -31,18 +31,19 @@ if [ -z "$OUTPUT" ]; then
     OUTPUT="concat-output.mkv"
 fi
 
-if [ -f "filelist.txt" ]; then
-    if ! ask_yes "filelist.txt is exist, overwrite it?"; then
-        exit 1
-    fi
+filelist="$(mktemp -p . filelist.XXXXXXXXXX.txt)"
+
+if [ -z "$filelist" ]; then
+    echo >&2 "can not create filelist txt"
+    exit 1
 fi
 
-trap 'rm filelist.txt' EXIT
+trap "rm $filelist" EXIT
 
 callback() {
     local video="$1"
 }
 
-find . -type f '(' "${video_find_ext[@]}" ')' -printf "file '%f'\n" >filelist.txt
+find . -type f '(' "${video_find_ext[@]}" ')' -printf "file '%f'\n" >"$filelist"
 
-"$FFMPEG" -f concat -i filelist.txt -c copy "$OUTPUT"
+"$FFMPEG" -f concat -i "$filelist" -c copy "$OUTPUT"
