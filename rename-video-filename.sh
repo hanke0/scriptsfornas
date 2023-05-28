@@ -1,0 +1,136 @@
+#!/usr/bin/env bash
+
+set -e
+set -o pipefail
+
+usage="
+Usage: ${0##*/} [OPTION]... <video> [videos]...
+Rename video file name with template.
+
+TEMPLATE:
+    title
+    season_episode
+    year
+    bilingualtitle
+    originaltitle
+
+    audio_codec
+    audio_codec1
+    video_codec
+    video_codec1
+    resolution
+    
+OPTION:
+    -t, --template            template of filename.
+    -y, --yes                 do not ask.
+"
+
+# shellcheck source=/dev/null
+. "$(dirname "$(realpath "$0")")/base-for-all.sh"
+
+getopt_from_usage "$usage" "$@"
+require_basic_commands
+require_command ffprobe jq
+
+if [ -z "$TEMPLATE" ]; then
+    TEMPLATE="${bilingualtitle}.${year}.${season_episode}.${video_codec}.${resolution}.${audio_codec}"
+fi
+
+# export audio_codec audio_codec1
+set_audio_infos() {
+    local filename data
+    filename="$1"
+    data="$(ffprobe -show_streams -select_streams a \
+        -hide_banner -loglevel error -print_format json "${filename}")"
+    audio_codec="$(jq -r '.streams[0].codec_name' <<<"${data}")"
+    audio_codec1="$(jq -r '.streams[].codec_name' <<<"${data}" | uniq | xargs)"
+}
+
+# export video_codec video_codec1 resolution height width
+set_video_infos() {
+    local filename data
+    filename="$1"
+    data="$(ffprobe -show_streams -select_streams a \
+        -hide_banner -loglevel error -print_format json "${filename}")"
+    video_codec="$(jq -r '.streams[0].codec_name' <<<"${data}")"
+    video_codec1="$(jq -r '.streams[].codec_name' <<<"${data}" | uniq | xargs)"
+    height="$(jq -r '.streams[].height' <<<"${data}")"
+    width="$(jq -r '.streams[].width' <<<"${data}")"
+    resolution="${width}x${height}"
+}
+
+get_title_from_ffprobe() {
+    ffprobe -show_entries format_tags=title -of compact=p=0:nk=1 -hide_banner -loglevel error
+}
+
+XMLQUERY="$(dirname "$(realpath "$0")")/xmlquery.sh"
+
+# export title season_episode season episode year originaltitle bilingualtitle
+set_info_from_nfo() {
+    local file
+    title=
+    IFS= read -r -d '' file \
+        < <(find "$(dirname "$1")" -maxdepth 1 -mindepth 1 -type f -name '*.nfo' -print0) ||
+        true
+
+    if [ -z "$file" ]; then
+        echo >&2 "can not find nfo file: $1"
+        return 0
+    fi
+    title="$("$XMLQUERY" 'movie.title' "$file")"
+    if [ -z "$title" ]; then
+        title="$("$XMLQUERY" 'tvshow.title' "$file")"
+    fi
+    originaltitle="$("$XMLQUERY" 'movie.originaltitle' "$file")"
+    if [ -z "$originaltitle" ]; then
+        originaltitle="$("$XMLQUERY" 'tvshow.originaltitle' "$file")"
+    fi
+    year="$("$XMLQUERY" 'movie.year' "$file")"
+    if [ -z "$year" ]; then
+        year="$("$XMLQUERY" 'tvshow.year' "$file")"
+    fi
+    if [ "$title" = "$originaltitle" ]; then
+        bilingualtitle="$title"
+    else
+        bilingualtitle="$title.$originaltitle"
+    fi
+
+    season="$("$XMLQUERY" 'movie.title' "$file")"
+    episode="$("$XMLQUERY" 'movie.title' "$file")"
+    season_episode=
+    if [ -n "$season" ] && [ -n "$episode" ]; then
+        season_episode="$(printf 'S%02dE%02d' "$season" "$episode")"
+    fi
+}
+
+doone() {
+    local dest filename jobprompt
+
+    set_info_from_nfo
+    set_audio_infos
+    set_video_infos
+
+    eval "dest='$template'"
+    dest="$(sed 's/\.\.\.*/./g' <<<"$dest")"
+    dest="${dest}.$(filename_ext "$filename")"
+
+    jobprompt="mv '$filename' '$(dirname "$filename")/$dest'"
+    if istrue "$YES"; then
+        echo "$jobprompt"
+        mv "$filename" "$(dirname "$filename")/$dest"
+        return 0
+    fi
+    if ask_yes "${jobprompt}?[Y/n]" yes; then
+        mv "$filename" "$(dirname "$filename")/$dest"
+    else
+        echo "abort"
+    fi
+}
+
+for video in "${PARAMS[@]}"; do
+    if [ -f "$video" ]; then
+        doone "$video"
+        continue
+    fi
+    echo >&2 "Not a video file: $video"
+done
