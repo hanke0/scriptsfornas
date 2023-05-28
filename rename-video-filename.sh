@@ -68,15 +68,7 @@ XMLQUERY="$(dirname "$(realpath "$0")")/xmlquery.sh"
 # export title season_episode season episode year originaltitle bilingualtitle
 set_info_from_nfo() {
     local file
-    title=
-    IFS= read -r -d '' file \
-        < <(find "$(dirname "$1")" -maxdepth 1 -mindepth 1 -type f -name '*.nfo' -print0) ||
-        true
-
-    if [ -z "$file" ]; then
-        echo >&2 "can not find nfo file: $1"
-        return 0
-    fi
+    file="$(filename_base "$1").nfo"
     title="$("$XMLQUERY" 'movie.title' "$file")"
     if [ -z "$title" ]; then
         title="$("$XMLQUERY" 'tvshow.title' "$file")"
