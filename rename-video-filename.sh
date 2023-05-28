@@ -103,6 +103,7 @@ doone() {
     set_video_infos "$1"
 
     eval "dest='$TEMPLATE'"
+    dest="${dest//[^[:alnum:]]/.}"
     dest="$(sed 's/\.\.\.*/./g' <<<"$dest")"
     dest="${dest}.$(filename_ext "$1")"
 
