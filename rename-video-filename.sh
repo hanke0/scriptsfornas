@@ -96,7 +96,7 @@ set_info_from_nfo() {
 }
 
 doone() {
-    local dest filename jobprompt
+    local dest jobprompt
 
     set_info_from_nfo "$1"
     set_audio_infos "$1"
@@ -104,16 +104,16 @@ doone() {
 
     eval "dest='$template'"
     dest="$(sed 's/\.\.\.*/./g' <<<"$dest")"
-    dest="${dest}.$(filename_ext "$filename")"
+    dest="${dest}.$(filename_ext "$1")"
 
-    jobprompt="mv '$filename' '$(dirname "$filename")/$dest'"
+    jobprompt="mv '$1' '$(dirname "$1")/$dest'"
     if istrue "$YES"; then
         echo "$jobprompt"
-        mv "$filename" "$(dirname "$filename")/$dest"
+        mv "$1" "$(dirname "$1")/$dest"
         return 0
     fi
     if ask_yes "${jobprompt}?[Y/n]" yes; then
-        mv "$filename" "$(dirname "$filename")/$dest"
+        mv "$1" "$(dirname "$1")/$dest"
     else
         echo "abort"
     fi
