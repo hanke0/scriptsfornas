@@ -98,9 +98,9 @@ set_info_from_nfo() {
 doone() {
     local dest filename jobprompt
 
-    set_info_from_nfo
-    set_audio_infos
-    set_video_infos
+    set_info_from_nfo "$1"
+    set_audio_infos "$1"
+    set_video_infos "$1"
 
     eval "dest='$template'"
     dest="$(sed 's/\.\.\.*/./g' <<<"$dest")"
