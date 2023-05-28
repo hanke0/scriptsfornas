@@ -50,12 +50,12 @@ set_audio_infos() {
 set_video_infos() {
     local filename data
     filename="$1"
-    data="$(ffprobe -show_streams -select_streams a \
+    data="$(ffprobe -show_streams -select_streams v \
         -hide_banner -loglevel error -print_format json "${filename}")"
     video_codec="$(jq -r '.streams[0].codec_name' <<<"${data}")"
     video_codec1="$(jq -r '.streams[].codec_name' <<<"${data}" | uniq | xargs)"
-    height="$(jq -r '.streams[].height' <<<"${data}")"
-    width="$(jq -r '.streams[].width' <<<"${data}")"
+    height="$(jq -r '.streams[0].height' <<<"${data}")"
+    width="$(jq -r '.streams[0].width' <<<"${data}")"
     resolution="${width}x${height}"
 }
 
@@ -71,7 +71,7 @@ set_info_from_nfo() {
     file="$(filename_base "$1").nfo"
     title="$("$XMLQUERY" 'movie.title' "$file")"
     if [ -z "$title" ]; then
-        title="$("$XMLQUERY" 'tvshow.title' "$file")"
+        title="$("$XMLQUERY" 'episodedetails.showtitle' "$file")"
     fi
     originaltitle="$("$XMLQUERY" 'movie.originaltitle' "$file")"
     if [ -z "$originaltitle" ]; then
