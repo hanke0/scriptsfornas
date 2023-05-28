@@ -102,7 +102,7 @@ doone() {
     set_audio_infos "$1"
     set_video_infos "$1"
 
-    eval "dest='$template'"
+    eval "dest='$TEMPLATE'"
     dest="$(sed 's/\.\.\.*/./g' <<<"$dest")"
     dest="${dest}.$(filename_ext "$1")"
 
