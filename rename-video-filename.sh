@@ -33,7 +33,7 @@ require_basic_commands
 require_command ffprobe jq
 
 if [ -z "$TEMPLATE" ]; then
-    TEMPLATE="${bilingualtitle}.${year}.${season_episode}.${video_codec}.${resolution}.${audio_codec}"
+    TEMPLATE='${bilingualtitle}.${year}.${season_episode}.${video_codec}.${resolution}.${audio_codec}'
 fi
 
 # export audio_codec audio_codec1
@@ -102,7 +102,7 @@ doone() {
     set_audio_infos "$1"
     set_video_infos "$1"
 
-    eval "dest='$TEMPLATE'"
+    eval "dest=\"$TEMPLATE\""
     dest="${dest//[^[:alnum:]]/.}"
     dest="$(sed 's/\.\.\.*/./g' <<<"$dest")"
     dest="${dest}.$(filename_ext "$1")"
