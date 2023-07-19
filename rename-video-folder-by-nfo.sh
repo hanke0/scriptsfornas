@@ -97,6 +97,20 @@ domovie() {
     movefolder "$1" "$fullname.$year"
 }
 
+dotvseason() {
+    local fullname nfo src dest season
+    fullname="$1"
+    nfo="$2"
+
+    src="$(dirname "$nfo")"
+    season="$("$XMLQUERY" 'season.seasonnumber' "$nfo")"
+    if ! [ "$season" -gt 0 ]; then
+        echo >&2 "cannot get season from $nfo"
+        return 0
+    fi
+    movefolder "$src" "$fullname.S$(printf '%02d' "$season")"
+}
+
 dotv() {
     local src file title originaltitle year fullname jobprompt seasonnfo
     file="$1"
@@ -120,20 +134,6 @@ dotv() {
     done < <(find "$src" -mindepth 2 -maxdepth 2 -type f -name "season.nfo" -print0)
 
     movefolder "$src" "$fullname.$year"
-}
-
-dotvseason() {
-    local fullname nfo src dest season
-    fullname="$1"
-    nfo="$2"
-
-    src="$(dirname "$nfo")"
-    season="$("$XMLQUERY" 'season.seasonnumber' "$nfo")"
-    if ! [ "$season" -gt 0 ]; then
-        echo >&2 "cannot get season from $nfo"
-        return 0
-    fi
-    movefolder "$src" "$fullname.$(printf '%02d' "$season")"
 }
 
 doone() {
