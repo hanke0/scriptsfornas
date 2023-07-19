@@ -20,12 +20,6 @@ require_basic_commands
 
 XMLQUERY="$(dirname "$(realpath "$0")")/xmlquery.sh"
 
-isvideo() {
-    if [ -f "$1/tvshow.nfo" ]; then
-        return true
-    fi
-}
-
 getname() {
     local dest title originaltitle
     title="$1"
@@ -116,11 +110,12 @@ domovie() {
 
 dotv() {
     local src file title originaltitle year fullname jobprompt seasonnfo
-    if [ ! -f "$file" ]; then
-        echo >&2 "can not find nfo file: $1"
+    file="$1"
+    if ! [ -f "$file" ]; then
+        echo >&2 "can not find nfo file: $file"
         return 0
     fi
-    src="$(dirname "$1")"
+    src="$(dirname "$file")"
 
     title="$("$XMLQUERY" 'tvshow.title' "$file")"
     originaltitle="$("$XMLQUERY" 'tvshow.originaltitle' "$file")"
