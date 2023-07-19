@@ -35,14 +35,14 @@ getname() {
 }
 
 movefolder() {
-    local src destname
+    local src dest
     src="$1"
-    destname="$2"
-    if [ "$(basename "$src")" = "$destname" ]; then
+    dest="$(dirname "$src")/$2"
+    if samedir "$src" "$dest"; then
         return 0
     fi
-    dest="$(dirname "$src")/$destname"
-    jobprompt="mv '$src' '$destname'"
+
+    jobprompt="mv '$src' '$dest'"
     if istrue "$YES"; then
         mv "$1" "$dest"
         echo "$jobprompt"
