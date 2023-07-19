@@ -129,9 +129,9 @@ dotv() {
     fi
     fullname="$(getname "$title" "$originaltitle")"
 
-    while IFS= read -r -d '' seasonnfo; do
+    while IFS= read -r -d '' -u5 seasonnfo; do
         dotvseason "$fullname" "$seasonnfo"
-    done < <(find "$src" -mindepth 2 -maxdepth 2 -type f -name "season.nfo" -print0)
+    done 5< <(find "$src" -mindepth 2 -maxdepth 2 -type f -name "season.nfo" -print0)
 
     movefolder "$src" "$fullname.$year"
 }
