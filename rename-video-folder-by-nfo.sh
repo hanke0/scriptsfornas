@@ -137,9 +137,10 @@ dotv() {
 }
 
 doone() {
-    local file
+    local folder file
+    folder="$(realpath "$1")"
 
-    file="$1/tvshow.nfo"
+    file="$folder/tvshow.nfo"
     if [ -f "$file" ]; then
         dotv "$file"
         return
