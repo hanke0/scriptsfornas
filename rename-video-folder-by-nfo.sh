@@ -55,17 +55,6 @@ movefolder() {
     fi
 }
 
-isinteger() {
-    case "$1" in
-    [0-9]+)
-        return 0
-        ;;
-    *)
-        return 1
-        ;;
-    esac
-}
-
 goodfields() {
     local file title originaltitle year
     file="$1"
@@ -80,7 +69,7 @@ goodfields() {
         echo >&2 "can not get originaltitle from $file"
         return 1
     fi
-    if ! isinteger "$year"; then
+    if ! [ "$year" -gt 0 ]; then
         echo >&2 "can not get year from $file"
         return 1
     fi
@@ -140,7 +129,7 @@ dotvseason() {
 
     src="$(dirname "$nfo")"
     season="$("$XMLQUERY" 'season.seasonnumber' "$nfo")"
-    if ! isinteger "$season"; then
+    if ! [ "$season" -gt 0 ]; then
         echo >&2 "cannot get season from $nfo"
         return 0
     fi
