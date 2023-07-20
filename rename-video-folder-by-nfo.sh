@@ -94,7 +94,7 @@ domovie() {
         return 0
     fi
     fullname="$(getname "$title" "$originaltitle")"
-    movefolder "$1" "$fullname.$year"
+    movefolder "$1" "$(getname "$fullname.$year")"
 }
 
 dotvseason() {
@@ -108,7 +108,7 @@ dotvseason() {
         echo >&2 "cannot get season from $nfo"
         return 0
     fi
-    movefolder "$src" "$fullname.S$(printf '%02d' "$season")"
+    movefolder "$src" "$(getname "$fullname.S$(printf '%02d' "$season")")"
 }
 
 dotv() {
@@ -133,7 +133,7 @@ dotv() {
         dotvseason "$fullname" "$seasonnfo"
     done 5< <(find "$src" -mindepth 2 -maxdepth 2 -type f -name "season.nfo" -print0)
 
-    movefolder "$src" "$fullname.$year"
+    movefolder "$src" "$(getname "$fullname.$year")"
 }
 
 doone() {
