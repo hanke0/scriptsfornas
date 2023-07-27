@@ -16,7 +16,7 @@ OPTION:
 
 getopt_from_usage "$usage" "$@"
 require_basic_commands
-require_command ffprob jq
+require_command ffprobe jq
 
 filename="${PARAMS[0]}"
 if [ -z "$filename" ] || [ ! -f "$filename" ]; then
