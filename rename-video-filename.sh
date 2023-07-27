@@ -79,7 +79,7 @@ set_info_from_nfo() {
     fi
     year="$("$XMLQUERY" 'movie.year' "$file")"
     if [ -z "$year" ]; then
-        year="$("$XMLQUERY" 'tvshow.year' "$file")"
+        year="$("$XMLQUERY" 'episodedetails.year' "$file")"
     fi
     if [ "$title" = "$originaltitle" ]; then
         bilingualtitle="$title"
@@ -87,8 +87,8 @@ set_info_from_nfo() {
         bilingualtitle="$title.$originaltitle"
     fi
 
-    season="$("$XMLQUERY" 'movie.title' "$file")"
-    episode="$("$XMLQUERY" 'movie.title' "$file")"
+    season="$("$XMLQUERY" 'episodedetails.season' "$file")"
+    episode="$("$XMLQUERY" 'episodedetails.episode' "$file")"
     season_episode=
     if [ -n "$season" ] && [ -n "$episode" ]; then
         season_episode="$(printf 'S%02dE%02d' "$season" "$episode")"
