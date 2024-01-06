@@ -65,6 +65,6 @@ find "$DESTINATION" \( -name "*.rar" -or -name "*.zip" -or -name "*.tar.*" -or -
 
 find "$DESTINATION" -type d -print0 |
     while IFS= read -r -d '' folder; do
-        mv -f "$folder/"* "$DESTINATION/"
+        mv -f -- "$folder/"* "$DESTINATION/"
         rmdir "$folder"
     done

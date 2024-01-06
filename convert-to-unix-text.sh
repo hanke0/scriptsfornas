@@ -54,5 +54,5 @@ for f in "${PARAMS[@]}"; do
         echo >&2 "convert fail: $f"
         exit 1
     fi
-    mv "$tmp" "$name"
+    mv -- "$tmp" "$name"
 done

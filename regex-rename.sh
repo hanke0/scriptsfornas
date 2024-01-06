@@ -79,6 +79,6 @@ for file in "${FILES[@]}"; do
     from="$folder/$base"
     to="$folder/$tobase"
     if [ "$from" != "$to" ]; then
-        do_move "$from" "$to"
+        do_move -- "$from" "$to"
     fi
 done

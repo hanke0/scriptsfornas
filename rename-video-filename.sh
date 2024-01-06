@@ -107,14 +107,14 @@ doone() {
     dest="$(sed 's/\.\.\.*/./g' <<<"$dest")"
     dest="${dest}.$(filename_ext "$1")"
 
-    jobprompt="mv '$1' '$(dirname "$1")/$dest'"
+    jobprompt="mv --'$1' '$(dirname "$1")/$dest'"
     if istrue "$YES"; then
         echo "$jobprompt"
-        mv "$1" "$(dirname "$1")/$dest"
+        mv -- "$1" "$(dirname "$1")/$dest"
         return 0
     fi
     if ask_yes "${jobprompt}?[Y/n]" yes; then
-        mv "$1" "$(dirname "$1")/$dest"
+        mv -- "$1" "$(dirname "$1")/$dest"
     else
         echo "abort"
     fi

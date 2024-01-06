@@ -43,7 +43,7 @@ if istrue "$HARDLINK"; then
 fi
 
 do_video_callback() {
-    "${COLLECTCMD}" "$(realpath "$1")" "$DST/$(basename "$1")"
+    "${COLLECTCMD}" -- "$(realpath "$1")" "$DST/$(basename "$1")"
 }
 
 find_videos_and_do_callback "$SRC" do_video_callback

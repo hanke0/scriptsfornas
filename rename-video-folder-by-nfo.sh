@@ -48,14 +48,14 @@ movefolder() {
         return 0
     fi
 
-    jobprompt="mv '$src' '$dest'"
+    jobprompt="mv -- '$src' '$dest'"
     if istrue "$YES"; then
-        mv "$1" "$dest"
+        mv -- "$1" "$dest"
         echo "$jobprompt"
         return 0
     fi
     if ask_yes "${jobprompt}?[Y/n]" yes; then
-        mv "$1" "$dest"
+        mv -- "$1" "$dest"
     else
         echo "abort"
     fi

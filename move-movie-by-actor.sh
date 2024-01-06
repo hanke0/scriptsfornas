@@ -61,14 +61,14 @@ doone() {
         return 0
     fi
     x mkdir -p "$dest"
-    jobprompt="mv '$1' '$dest'"
+    jobprompt="mv -- '$1' '$dest'"
     if istrue "$YES"; then
-        x mv "$1" "$dest"
+        x mv -- "$1" "$dest"
         echo "$jobprompt"
         return 0
     fi
     if ask_yes "${jobprompt}?[Y/n]" yes; then
-        x mv "$1" "$dest"
+        x mv -- "$1" "$dest"
     else
         echo >&2 "user abort"
     fi

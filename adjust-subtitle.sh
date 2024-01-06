@@ -132,7 +132,7 @@ adjust_file() {
     done <"$1"
 
     if [ -n "$OVERWRITE" ]; then
-        mv -f "$output" "$1"
+        mv -f -- "$output" "$1"
     fi
 }
 

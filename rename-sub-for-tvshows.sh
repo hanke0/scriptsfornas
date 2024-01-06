@@ -45,7 +45,7 @@ rename_an_eposide() {
                 tosub="$(filename_base "$epfile").$sublang.$(filename_ext "$sub")"
             fi
             if [ "$tosub" != "$(basename "$sub")" ]; then
-                mv "$sub" "$folder/$tosub"
+                mv -- "$sub" "$folder/$tosub"
             fi
         done
 }

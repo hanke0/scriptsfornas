@@ -40,7 +40,7 @@ remove_empty_folder() {
     if [ -z "$(ls -A "$1")" ]; then
         echo "FIND: $1"
         mkdir -p "$TRASH/$1"
-        mv "$1" "$TRASH/$1"
+        mv -- "$1" "$TRASH/$1"
     fi
 }
 
