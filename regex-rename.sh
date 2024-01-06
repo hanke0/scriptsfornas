@@ -33,11 +33,11 @@ fi
 
 if [ -z "$NOEXEC" ]; then
     move() {
-        mv "$@"
+        mv -- "$@"
     }
 else
     move() {
-        echo mv "$@"
+        echo mv -- "$@"
     }
 fi
 
@@ -58,7 +58,7 @@ if [ -z "$YES" ]; then
     }
 else
     do_move() {
-        move "$@"
+        move -- "$@"
     }
 fi
 
