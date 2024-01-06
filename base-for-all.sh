@@ -62,6 +62,10 @@ $evalstring
     echo "\$helpstring"
     exit 0
     ;;
+--)
+    PARAMS+=("\$@")
+    shift $#;
+    ;;
 -*)
     echo >&2 "unknown option: \$1"
     exit 1

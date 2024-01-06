@@ -8,7 +8,7 @@ Create a new standard bash script.
 "
 
 # shellcheck source=/dev/null
-. "$(dirname "$(realpath "$0")")/base-for-all.sh"
+. "$(dirname -- "$(realpath -- "$0")")/base-for-all.sh"
 
 getopt_from_usage "$usage" "$@"
 

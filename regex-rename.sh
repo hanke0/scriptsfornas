@@ -58,7 +58,7 @@ if [ -z "$YES" ]; then
     }
 else
     do_move() {
-        move -- "$@"
+        move "$@"
     }
 fi
 
@@ -69,8 +69,8 @@ getto() {
 CTO="$(getto "$TO")"
 
 for file in "${FILES[@]}"; do
-    folder="$(dirname "$file")"
-    base="$(basename "$file")"
+    folder="$(dirname -- "$file")"
+    base="$(basename -- "$file")"
     if [[ ! "$base" =~ $FROM ]]; then
         echo >&2 "file not match regex: $file"
         continue
@@ -79,6 +79,6 @@ for file in "${FILES[@]}"; do
     from="$folder/$base"
     to="$folder/$tobase"
     if [ "$from" != "$to" ]; then
-        do_move -- "$from" "$to"
+        do_move "$from" "$to"
     fi
 done
