@@ -1,15 +1,15 @@
 #!/usr/bin/env bash
 
-set -e
-set -o pipefail
+set -Eeo pipefail
 
 usage="
 Usage: ${0##*/} [OPTION]... <directory>
-Concat a video in one directory to a single video.
+Concat all mp4 in the directory to a single mp4.
 
 OPTION:
     -o, --output=FILENAME          output file (default to concat-output.mkv).
     -f, --ffmpeg=EXEC              ffmpeg file path (default to ffmpeg).
+    -r, --recursive                search recursively.
 "
 
 # shellcheck source=/dev/null
@@ -27,8 +27,12 @@ if [ -z "$FFMPEG" ]; then
     FFMPEG=ffmpeg
 fi
 
+depth=(-maxdepth 1 -mindepth 1)
 if [ -z "$OUTPUT" ]; then
-    OUTPUT="concat-output.mkv"
+    OUTPUT="concat-output.mp4"
+fi
+if [ -n "$RECURSIVE" ]; then
+    depth=()
 fi
 
 filelist="$(mktemp -p . filelist.XXXXXXXXXX.txt)"
@@ -40,10 +44,6 @@ fi
 
 trap "rm $filelist" EXIT
 
-callback() {
-    local video="$1"
-}
-
-find . -type f '(' "${video_find_ext[@]}" ')' -printf "file '%f'\n" >"$filelist"
+find . "${depth[@]}" -type f -name '*.mp4' -printf "file '%f'\n" >"$filelist"
 
 "$FFMPEG" -f concat -i "$filelist" -c copy "$OUTPUT"
