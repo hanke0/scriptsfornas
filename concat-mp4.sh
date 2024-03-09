@@ -46,4 +46,4 @@ trap "rm $filelist" EXIT
 
 find . "${depth[@]}" -type f -name '*.mp4' -printf "file '%f'\n" >"$filelist"
 
-"$FFMPEG" -f concat -i "$filelist" -c copy "$OUTPUT"
+"$FFMPEG" -f concat -safe 0 -i "$filelist" -c copy "$OUTPUT"
