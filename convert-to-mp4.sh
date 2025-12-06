@@ -62,6 +62,7 @@ esac
 case "$PIX_FMT" in
 yuv420p | "")
 	PIX_FMT="yuv420p"
+    ENCODER_PIX_FMT="nv12"
 	;;
 *)
 	echo >&2 "unknown pix_fmt: $PIX_FMT, yuv420p is supported"
@@ -151,7 +152,7 @@ qsv_encode() {
 		-c:a aac -b:a 128k
 		# subtitles
 		-c:s copy
-		-pix_fmt yuv420p
+		-pix_fmt "${ENCODER_PIX_FMT}"
 		# move moov to the beginning of the file to improve online viewing experience
 		-movflags +faststart
 		"$2"
@@ -170,7 +171,7 @@ cude_encode() {
 		-c:a aac -b:a 128k
 		# 字幕
 		-c:s copy
-		-pix_fmt yuv420p
+		-pix_fmt "${ENCODER_PIX_FMT}"
 		# 将视频文件的元信息（moov 块）移动到文件开头。这样，浏览器无需加载完整视频就能开始播放和跳转，极大提升在线观看体验
 		-movflags +faststart
 		"$2"
