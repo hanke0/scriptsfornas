@@ -5,12 +5,12 @@ set -o pipefail
 
 usage="
 Usage: ${0##*/} [OPTION]... input output
-Convert to mp4.
+Convert to mp4 format fit for online viewing.
 
 OPTION:
     -y, --yes     yes to all questions, overwrite output file without asking.
     -c, --codec   codec to use, default to h264.
-	-a, --audio   audio codec to use, default to aac.
+    -a, --audio   audio codec to use, default to aac.
 "
 
 # shellcheck source=/dev/null
@@ -88,6 +88,7 @@ video_codec() {
 }
 
 just_copy() {
+	echo >&2 "just copy file: $1 -> $2"
 	if istrue "$YES"; then
 		cp -f -- "$1" "$2"
 	else
@@ -110,7 +111,7 @@ copy_encode() {
 		-movflags +faststart
 		"$2"
 	)
-	"${args[@]}"
+	vexec "${args[@]}"
 }
 
 copy_video_encode() {
@@ -128,7 +129,7 @@ copy_video_encode() {
 		-movflags +faststart
 		"$2"
 	)
-	"${args[@]}"
+	vexec "${args[@]}"
 }
 
 qsv_encode() {
@@ -147,7 +148,7 @@ qsv_encode() {
 		-movflags +faststart
 		"$2"
 	)
-	"${args[@]}"
+	vexec "${args[@]}"
 }
 
 cude_encode() {
@@ -165,13 +166,14 @@ cude_encode() {
 		-movflags +faststart
 		"$2"
 	)
-	"${args[@]}"
+	vexec "${args[@]}"
 }
 
 is_faststart() {
 	local pat
 	# moov appears before mdat means faststart
 	pat=$("$FFMPEG" -v trace -i "$1" 2>&1 | grep -o -e type:\'mdat\' -e type:\'moov\' | xargs)
+	echo >&2 "is_faststart: ${pat}"
 	case "$pat" in
 	*moov*mdat*)
 		return 0
@@ -184,7 +186,8 @@ is_faststart() {
 
 is_mp4_format() {
 	local fmt
-	fmt=$("$FFPROBE" -v error -select_streams v:0 -show_entries format=format_name -of default=noprint_wrappers=1:nokey=1)
+	fmt=$("$FFPROBE" -v error -select_streams v:0 -show_entries format=format_name -of default=noprint_wrappers=1:nokey=1 "$1")
+	echo >&2 "video_format: $fmt"
 	case "$fmt" in
 	*mp4*)
 		return 0
@@ -199,15 +202,28 @@ support_hwaccel() {
 	"$FFMPEG" -hide_banner -hwaccels 2>&1 | grep -q "$1" >/dev/null 2>&1
 }
 
-case "$(video_codec "$input")_$(audio_codec "$input")" in
-$CODEC_$AUDIO_CODEC)
-	if is_faststart "$input" && is_mp4_format "$input"; then
-		just_copy "$input" "$output"
-	else
-		copy_encode "$input" "$output"
-	fi
+codec="$(video_codec "$input")_$(audio_codec "$input")"
+if is_faststart "$input"; then
+	codec="${codec}_faststart"
+else
+	codec="${codec}_notfaststart"
+fi
+if is_mp4_format "$input"; then
+	codec="${codec}_mp4"
+else
+	codec="${codec}_notmp4"
+fi
+
+echo >&2 "-- CODEC: ${codec}"
+
+case "$codec" in
+${CODEC}_${AUDIO_CODEC}_faststart_mp4)
+	just_copy "$input" "$output"
 	;;
-$CODEC_*)
+${CODEC}_${AUDIO_CODEC}_*)
+	copy_encode "$input" "$output"
+	;;
+${CODEC}_*)
 	copy_video_encode "$input" "$output"
 	;;
 *)
