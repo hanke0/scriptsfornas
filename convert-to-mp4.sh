@@ -11,6 +11,7 @@ OPTION:
     -y, --yes     yes to all questions, overwrite output file without asking.
     -c, --codec   codec to use, default to h264.
     -a, --audio   audio codec to use, default to aac.
+    -p, --pix_fmt pix_fmt to use, default to yuv420p.
 "
 
 # shellcheck source=/dev/null
@@ -54,6 +55,16 @@ aac | "")
 	;;
 *)
 	echo >&2 "unknown audio codec: $AUDIO_CODEC, aac is supported"
+	exit 1
+	;;
+esac
+
+case "$PIX_FMT" in
+yuv420p | "")
+	PIX_FMT="yuv420p"
+	;;
+*)
+	echo >&2 "unknown pix_fmt: $PIX_FMT, yuv420p is supported"
 	exit 1
 	;;
 esac
