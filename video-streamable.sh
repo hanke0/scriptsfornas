@@ -25,18 +25,6 @@ require_basic_commands
 FFMPEG="${FFMPEG:-ffmpeg}"
 FFPROBE="${FFPROBE:-ffprobe}"
 
-input="${PARAMS[0]}"
-output="${PARAMS[1]}"
-if ! [ -f "$input" ]; then
-	echo >&2 "Not a file: $input"
-	exit 1
-fi
-
-if [ -z "$output" ]; then
-	echo >&2 "output not set, try --help for more information"
-	exit 1
-fi
-
 case "$CODEC" in
 h264 | "")
 	CODEC="h264"
