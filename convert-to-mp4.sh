@@ -21,6 +21,7 @@ require_basic_commands
 # require_command
 
 FFMPEG="${FFMPEG:-ffmpeg}"
+FFPROBE="${FFPROBE:-ffprobe}"
 
 input="${PARAMS[0]}"
 output="${PARAMS[1]}"
@@ -71,7 +72,7 @@ aac)
 esac
 
 audio_codec() {
-	ffprobe -v error -select_streams a:0 \
+	"$FFPROBE" -v error -select_streams a:0 \
 		-show_entries \
 		stream=codec_name -of \
 		default=noprint_wrappers=1:nokey=1 \
@@ -79,7 +80,7 @@ audio_codec() {
 }
 
 video_codec() {
-	ffprobe -v error -select_streams v:0 \
+	"$FFPROBE" -v error -select_streams v:0 \
 		-show_entries \
 		stream=codec_name -of \
 		default=noprint_wrappers=1:nokey=1 \
@@ -87,6 +88,14 @@ video_codec() {
 }
 
 just_copy() {
+	if istrue "$YES"; then
+		cp -f -- "$1" "$2"
+	else
+		cp -- "$1" "$2"
+	fi
+}
+
+copy_encode() {
 	local args
 	args=(
 		"$FFMPEG" -hide_banner $YESOPTION
@@ -159,13 +168,44 @@ cude_encode() {
 	"${args[@]}"
 }
 
+is_faststart() {
+	local pat
+	# moov appears before mdat means faststart
+	pat=$("$FFMPEG" -v trace -i "$1" 2>&1 | grep -o -e type:\'mdat\' -e type:\'moov\' | xargs)
+	case "$pat" in
+	*moov*mdat*)
+		return 0
+		;;
+	*)
+		return 1
+		;;
+	esac
+}
+
+is_mp4_format() {
+	local fmt
+	fmt=$("$FFPROBE" -v error -select_streams v:0 -show_entries format=format_name -of default=noprint_wrappers=1:nokey=1)
+	case "$fmt" in
+	*mp4*)
+		return 0
+		;;
+	*)
+		return 1
+		;;
+	esac
+}
+
 support_hwaccel() {
 	"$FFMPEG" -hide_banner -hwaccels 2>&1 | grep -q "$1" >/dev/null 2>&1
 }
 
 case "$(video_codec "$input")_$(audio_codec "$input")" in
 $CODEC_$AUDIO_CODEC)
-	just_copy "$input" "$output"
+	if is_faststart "$input" && is_mp4_format "$input"; then
+		just_copy "$input" "$output"
+	else
+		copy_encode "$input" "$output"
+	fi
 	;;
 $CODEC_*)
 	copy_video_encode "$input" "$output"
