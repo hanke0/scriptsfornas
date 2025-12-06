@@ -11,6 +11,7 @@ OPTION:
     -y, --yes     yes to all questions, overwrite output file without asking.
     -c, --codec   codec to use, default to h264.
     -a, --audio   audio codec to use, default to aac.
+    -p, --pix_fmt pix_fmt to use, default to yuv420p.
 "
 
 # shellcheck source=/dev/null
@@ -35,16 +36,8 @@ if [ -z "$output" ]; then
 	exit 1
 fi
 
-if [ -z "$CODEC" ]; then
-	CODEC="h264"
-fi
-
-if [ -z "$AUDIO_CODEC" ]; then
-	AUDIO_CODEC="aac"
-fi
-
 case "$CODEC" in
-h264)
+h264 | "")
 	CODEC="h264"
 	;;
 hevc)
@@ -56,13 +49,8 @@ hevc)
 	;;
 esac
 
-YESOPTION=
-if istrue "$YES"; then
-	YESOPTION='-y'
-fi
-
 case "$AUDIO_CODEC" in
-aac)
+aac | "")
 	AUDIO_CODEC="aac"
 	;;
 *)
@@ -70,6 +58,21 @@ aac)
 	exit 1
 	;;
 esac
+
+case "$PIX_FMT" in
+yuv420p | "")
+	PIX_FMT="yuv420p"
+	;;
+*)
+	echo >&2 "unknown pix_fmt: $PIX_FMT, yuv420p is supported"
+	exit 1
+	;;
+esac
+
+YESOPTION=
+if istrue "$YES"; then
+	YESOPTION='-y'
+fi
 
 audio_codec() {
 	"$FFPROBE" -v error -select_streams a:0 \
@@ -85,6 +88,10 @@ video_codec() {
 		stream=codec_name -of \
 		default=noprint_wrappers=1:nokey=1 \
 		"$1"
+}
+
+pix_fmt() {
+	"$FFPROBE" -v error -select_streams v:0 -show_entries stream=pix_fmt -of default=noprint_wrappers=1:nokey=1 "$1"
 }
 
 just_copy() {
@@ -139,11 +146,12 @@ qsv_encode() {
 		-hwaccel qsv -hwaccel_output_format qsv
 		-i "$1" -map 0
 		# video
-		-c:v ${CODEC}_qsv -global_quality 21
+		-c:v ${CODEC}_qsv -global_quality 20
 		# audio
 		-c:a aac -b:a 128k
 		# subtitles
 		-c:s copy
+		-pix_fmt yuv420p
 		# move moov to the beginning of the file to improve online viewing experience
 		-movflags +faststart
 		"$2"
@@ -157,11 +165,12 @@ cude_encode() {
 		"$FFMPEG" -hide_banner $YESOPTION
 		-hwaccel cuda
 		-i "$1" -map 0
-		-c:v ${CODEC}_nvenc
+		-c:v ${CODEC}_nvenc -cq 20
 		# audio
 		-c:a aac -b:a 128k
 		# 字幕
 		-c:s copy
+		-pix_fmt yuv420p
 		# 将视频文件的元信息（moov 块）移动到文件开头。这样，浏览器无需加载完整视频就能开始播放和跳转，极大提升在线观看体验
 		-movflags +faststart
 		"$2"
@@ -203,6 +212,9 @@ support_hwaccel() {
 }
 
 codec="$(video_codec "$input")_$(audio_codec "$input")"
+pix_fmt="$(pix_fmt "$input")"
+echo >&2 "-- PIX_FMT: ${pix_fmt}"
+codec="${codec}_${pix_fmt}"
 if is_faststart "$input"; then
 	codec="${codec}_faststart"
 else
@@ -217,13 +229,13 @@ fi
 echo >&2 "-- CODEC: ${codec}"
 
 case "$codec" in
-${CODEC}_${AUDIO_CODEC}_faststart_mp4)
+${CODEC}_${AUDIO_CODEC}_${PIX_FMT}_faststart_mp4)
 	just_copy "$input" "$output"
 	;;
-${CODEC}_${AUDIO_CODEC}_*)
+${CODEC}_${AUDIO_CODEC}_${PIX_FMT}_*)
 	copy_encode "$input" "$output"
 	;;
-${CODEC}_*)
+${CODEC}_*_${PIX_FMT}_*)
 	copy_video_encode "$input" "$output"
 	;;
 *)
