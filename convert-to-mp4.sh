@@ -129,7 +129,7 @@ copy_video_encode() {
 		# video
 		-c:v copy
 		# audio
-		-c:a aac -b:a 128k
+		-c:a aac -b:a 192k
 		# subtitles
 		-c:s copy
 		# move moov to the beginning of the file to improve online viewing experience
@@ -148,7 +148,7 @@ qsv_encode() {
 		# video
 		-c:v ${CODEC}_qsv -global_quality 20
 		# audio
-		-c:a aac -b:a 128k
+		-c:a aac -b:a 192k
 		# subtitles
 		-c:s copy
 		# move moov to the beginning of the file to improve online viewing experience
@@ -166,7 +166,7 @@ cude_encode() {
 		-i "$1" -map 0
 		-c:v ${CODEC}_nvenc -cq 20
 		# audio
-		-c:a aac -b:a 128k
+		-c:a aac -b:a 192k
 		# 字幕
 		-c:s copy
 		# 将视频文件的元信息（moov 块）移动到文件开头。这样，浏览器无需加载完整视频就能开始播放和跳转，极大提升在线观看体验
