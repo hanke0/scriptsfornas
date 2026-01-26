@@ -121,18 +121,8 @@ option_has_set() {
 }
 
 vexec() {
-    local i
-    for i in "$@"; do
-        case "-$i-" in
-        -*[[:blank:]]*-)
-            printf "'%s' " "$i"
-            ;;
-        *)
-            printf "%s " "$i"
-            ;;
-        esac
-    done
-    printf "\n"
+    printf >&2 '%q ' "$@"
+    printf >&2 "\n"
     "$@"
 }
 

@@ -87,7 +87,7 @@ fi
 
 trap "rm $filelist" EXIT
 
-find . "${depth[@]}" -type f -name '*.mp4' -printf "file '%f'\n" >"$filelist"
+find . "${depth[@]}" -type f -name '*.mp4' -printf "file '%p'\n" >"$filelist"
 
 if support_hwaccel "cuda"; then
 	cude_encode "$filelist" "$OUTPUT"
