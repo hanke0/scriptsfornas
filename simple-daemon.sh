@@ -212,6 +212,7 @@ list() {
 		[ -z "$name" ] && continue
 		name="${name%.*}"
         if [ "$1" = "-s" ]; then
+            printf '%s ' "$name"
             continue
         fi
 		code=running
@@ -220,6 +221,7 @@ list() {
 		fi
 		echo >&2 "--- $name is $code ---"
 	done
+    echo
 }
 
 action="$1"
