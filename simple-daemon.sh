@@ -1,153 +1,238 @@
-#!/usr/bin/env bash
+#!/bin/bash
 
-set -e
-set -o pipefail
+set +e
 
-usage="
-Usage: ${0##*/} [OPTION]... command -- <exec> [OPTION]...
-Starting a simple daemon useing init style.
-
-COMMAND
-    start
-    stop
-    status
-    restart
-
-OPTION:
-    -b --basedir=DIR          base directory of pidfile and (logfile default to /var).
-    -p --pidfile=FILE         set pid file(default to \$basedir/run.\$basenameofexec.pid)
-    -l --logout=FILE          set log output file(default to \$basedir/log/\$basenameofexec.log)
-    -s --signal=SIGNAL        signal number to kill a process(default to 15 SIGTERM)
-    -w --workdir=DIR          working directory (default to exec directory).
-    -n --name=STRING          daemon name (default to \$basenameofexec)
-"
-
-# shellcheck source=/dev/null
-. "$(dirname "$(realpath "$0")")/base-for-all.sh"
-
-getopt_from_usage "$usage" "$@"
-require_basic_commands
-
-pidofproc() {
-    local pidfile pid pattern status
-    pidfile="$1"
-    pattern="$2"
-
-    if [ -n "${pidfile:-}" ]; then
-        if [ -r "$pidfile" ]; then
-            read -r pid <"$pidfile"
-            if [ -n "${pid:-}" ]; then
-                if kill -0 "${pid:-}" 2>/dev/null; then
-                    echo "$pid"
-                    return 0
-                elif ps "${pid:-}" >/dev/null 2>&1; then
-                    echo "$pid"
-                    return 0 # program is running, but not owned by this user
-                else
-                    return 1 # program is dead and /var/run pid file exists
-                fi
-            fi
-        else
-            return 4 # pid file not readable, hence status is unknown.
-        fi
-    fi
-    # shellcheck disable=SC2009
-    pid="$(ps -axo pid=,command= | grep -v grep | grep "$pattern" | awk '{print $1}')"
-    if [ -z "$pid" ]; then
-        return 3 # program is not running
-    fi
-    xargs <<<"$pid"
-    return 0
+echo_usage() {
+	echo "Usage: $0 {start|stop|restart|create|list} <name> [program]"
+	echo "Simple process manager."
+	echo
+	echo "Environment:"
+	echo "  RUNUSER:   process runing user."
+	echo "  HOMEDIR:   process install home."
+	echo "  TZ:        process runing timezone."
+	echo "  DEBUG:     open debug mode when it set true."
 }
 
-COMMAND="${PARAMS[0]}"
-PARAMS=("${PARAMS[@]:1}")
-EXECNAME="${PARAMS[0]}"
-BASEEXEC="${EXECNAME##*/}"
-if [ -z "$EXECNAME" ] || [ -z "$BASEEXEC" ]; then
-    echo "execute command must provided"
-    exit 1
-fi
-if [ -z "$NAME" ]; then
-    NAME="$BASEEXEC"
-fi
-if ! option_has_set BASEDIR; then
-    BASEDIR="/var"
-fi
-if ! option_has_set WORKDIR; then
-    WORKDIR="$(dirname "$EXECNAME")"
-fi
-if ! option_has_set PIDFILE; then
-    PIDFILE="$BASEDIR/run/$NAME.pid"
-fi
-if [ -z "$LOGOUT" ]; then
-    LOGOUT="$BASEDIR/log/$NAME.log"
-fi
-if [ -z "$SIGNAL" ]; then
-    SIGNAL=SIGTERM
-fi
-
-start_daemon() {
-    local status pid cmd execargs i
-
-    pid="$(pidofproc "$PIDFILE" "${PARAMS[*]}" || true)"
-    if [ -n "$pid" ]; then
-        echo "$NAME is running $pid"
-        return 0
-    fi
-
-    for i in "${PARAMS[@]}"; do
-        execargs+="'$i' "
-    done
-
-    # https://stackoverflow.com/questions/58905011/is-it-possible-to-include-a-nohup-command-inside-a-bash-script
-    cmd="cd '$WORKDIR'; trap '' HUP; nohup $execargs >'$LOGOUT' 2>&1 </dev/null & echo \$! >'$PIDFILE';"
-    /bin/bash -c "$cmd"
+bad_usage() {
+	echo_usage >&2
+	exit 1
 }
 
-stop_daemon() {
-    local pid
-    pid="$(pidofproc "$PIDFILE" "$NAME" || true)"
-    rm -f "$PIDFILE"
-    if [ -z "$pid" ]; then
-        return 0
-    fi
-    kill "-$SIGNAL" "$pid"
+help_check() {
+	while [ $# -gt 0 ]; do
+		case "$1" in
+		-h | --help)
+			echo_usage
+			exit 0
+			;;
+		*)
+			shift
+			;;
+		esac
+	done
 }
 
-status_daemon() {
-    local status
-    status=0
-    pidofproc "$PIDFILE" "$NAME" >/dev/null || status=$?
-    if [ "$status" = 0 ]; then
-        echo "$NAME is running"
-        return 0
-    elif [ "$status" = 4 ]; then
-        echo "could not access PID file for $NAME"
-        return $status
-    else
-        echo "$NAME is not running"
-        return $status
-    fi
+help_check "$@"
+
+runuser="${RUNUSER:-1000}"
+tzinfo="${TZ:-Asia/Shanghai}"
+homedir="${HOMEDIR:-}"
+
+[[ "$runuser" =~ ^([a-z0-9\\-_]+)(:[a-z0-9\\-_]+)?$ ]] || {
+	echo >&2 "runuser is invalid"
+	exit 1
 }
 
-case "$COMMAND" in
+user=$(echo "$runuser" | cut -d: -f1)
+userid=$(id -u "$user")
+if [ -z "$userid" ]; then
+	echo >&2 "user $user not found"
+	exit 1
+fi
+
+userhome=$(eval echo "~$(id -un "$userid")")
+if [ -z "$userhome" ]; then
+	echo >&2 "user home not found"
+	exit 1
+fi
+if [ -z "$homedir" ]; then
+	homedir="${userhome}/custom-services"
+fi
+if [ ! -d "$homedir" ]; then
+	mkdir -p "$homedir" || exit 1
+fi
+
+good_name() {
+	[[ "$name" =~ ^[0-9a-z_]+$ ]]
+}
+
+name_check() {
+	if ! good_name "$name"; then
+		echo >&2 "name is invalid"
+		bad_usage
+	fi
+}
+
+debug() {
+	[ "${DEBUG}" = true ] && echo >&2 "$@"
+}
+
+init_proc_var() {
+	name="$1"
+	name_check "$name"
+	debug "service user is ${runuser}"
+	debug "service home dir is ${homedir}"
+	pidfile="${homedir}/$name.pid"
+	shfile="${homedir}/$name.sh"
+	logfile="${homedir}/$name.log"
+	hisfile="${homedir}/$name.his"
+	chown "${runuser}" -R "${homedir}"
+}
+
+create() {
+	local program
+	init_proc_var "$1"
+	program="$(realpath "$2")"
+	if [ ! -x "$program" ]; then
+		echo >&2 "program is not executeable: $program"
+		bad_usage
+	fi
+	cat >"$shfile" <<EOF
+set +e
+export TZ=${tzinfo}
+export LC_ALL=en_US.utf8
+cd /tmp || exit 1
+umask 027 || exit 1
+trap 'kill -s SIGTERM 0' EXIT
+ppid=\$\$
+printf '%s' "\$ppid" >'$pidfile'
+echo "\$ppid" >'$hisfile'
+while true; do
+    '${program}' >'$logfile' 2>&1 &
+    pid=\$!
+    printf '%s' "\$ppid \$pid" >'$pidfile'
+    echo "\$pid" >>"$hisfile"
+    wait "\$pid"
+    sleep 1
+done
+
+EOF
+	chmod 755 "$shfile"
+	chown "$runuser" "$shfile"
+}
+
+getpid_from_pidfile() {
+	if [ -f "$pidfile" ]; then
+		cat "$pidfile"
+	fi
+}
+
+start() {
+	init_proc_var "$1"
+	[ -x "$shfile" ] || {
+		echo >&2 "$name not exists, create it first"
+		exit 1
+	}
+	pid=$(getpid_from_pidfile)
+	if [ -n "$pid" ]; then
+		if pidexist $pid; then
+			echo "already running: $pid"
+			exit 0
+		fi
+	fi
+	debug "starting: setsid $shfile"
+	gosu "$runuser" setsid --fork bash "$shfile"
+	code=$?
+	debug "started code $code"
+	sleep 1
+	if ! show_status; then
+		echo >&2 "see more logs using"
+		echo >&2 "tail -F ${logfile}"
+		return 1
+	fi
+}
+
+pidexist() {
+	kill -0 "$1" >/dev/null 2>&1
+}
+
+stop() {
+	init_proc_var "$1"
+	pid=$(getpid_from_pidfile)
+	if [ -n "$pid" ]; then
+		if pidexist $pid; then
+			echo >&2 "kill $pid"
+			kill $pid >/dev/null 2>&1
+			timeout 5s tail --pid $(firstpid $pid) -f /dev/null
+			return 0
+		fi
+	fi
+}
+
+firstpid() {
+	echo "$1"
+}
+
+show_status() {
+	pid=$(getpid_from_pidfile)
+	if [ -z "$pid" ]; then
+		echo >&2 "stopped"
+		return 1
+	fi
+	if ! pidexist $pid; then
+		echo >&2 "stopped"
+		return 1
+	fi
+	ps -o user,pid,ppid,s,etime,start,times,rss,cmd -g $(ps -o sid= -p $(firstpid $pid))
+	for p in $pid; do
+		if ! pidexist $p; then
+			echo >&2 "EXITED  $p"
+			return 1
+		fi
+	done
+}
+
+status() {
+	init_proc_var "$1"
+	show_status "$1"
+}
+
+list() {
+	local name code
+	for name in $(find "${homedir}" -maxdepth 1 -mindepth 1 -name '*.sh' -exec basename {} \;); do
+		[ -z "$name" ] && continue
+		name="${name%.*}"
+		code=running
+		if ! "$0" status "$name"; then
+			code=stopped
+		fi
+		echo >&2 "--- $name is $code ---"
+	done
+}
+
+action="$1"
+shift
+case "$action" in
+create)
+	create "$@"
+	;;
 start)
-    start_daemon
-    ;;
+	start "$@"
+	;;
 stop)
-    stop_daemon
-    ;;
-restart)
-    stop_daemon
-    sleep 2
-    start_daemon
-    ;;
+	stop "$@"
+	;;
 status)
-    status_daemon
-    ;;
+	status "$@"
+	;;
+restart)
+	stop "$@"
+	start "$@"
+	;;
+list)
+	list "$@"
+	;;
 *)
-    echo "Usage: $0 {start|stop|status|restart}"
-    exit 2
-    ;;
+	bad_usage
+	;;
 esac
