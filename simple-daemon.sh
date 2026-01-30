@@ -11,6 +11,15 @@ echo_usage() {
 	echo "  HOMEDIR:   process install home."
 	echo "  TZ:        process runing timezone."
 	echo "  DEBUG:     open debug mode when it set true."
+    echo
+    echo "Examples:"
+    echo "  $0 create foo /bin/foo.sh   # create a new daemon process name foo, run /bin/foo.sh"
+    echo "  $0 start foo                # start the daemon process name foo"
+    echo "  $0 stop foo                 # stop the daemon process name foo"
+    echo "  $0 restart foo              # restart the daemon process name foo"
+    echo "  $0 list                     # list all daemon processes"
+    echo "  $0 list -s                  # list all daemon processes in short mode"
+    echo "  $0 status foo               # show the status of the daemon process name foo"
 }
 
 bad_usage() {
@@ -202,6 +211,9 @@ list() {
 	for name in $(find "${homedir}" -maxdepth 1 -mindepth 1 -name '*.sh' -exec basename {} \;); do
 		[ -z "$name" ] && continue
 		name="${name%.*}"
+        if [ "$1" = "-s" ]; then
+            continue
+        fi
 		code=running
 		if ! "$0" status "$name"; then
 			code=stopped
