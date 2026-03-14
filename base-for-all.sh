@@ -120,6 +120,11 @@ option_has_set() {
     eval "test ! -z \${$1+x}"
 }
 
+print_command() {
+    printf >&2 '%q ' "$@"
+    printf >&2 "\n"
+}
+
 vexec() {
     printf >&2 '%q ' "$@"
     printf >&2 "\n"
