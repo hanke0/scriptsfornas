@@ -10,6 +10,7 @@ Collect all pictures or videos into folers named by date.
 OPTION:
     -p,--picture  collect pictures.
     -v,--video    collect videos.
+    -m,--mtime    use file modification time instead of date in filename.
     -n,--dryrun   dry run mode.
 "
 
@@ -105,4 +106,26 @@ do_all_dates() {
 	done
 }
 
-do_all_dates $(find_dates)
+collect_by_mtime() {
+	local args date file mvopt
+	args=(
+		find . -maxdepth 1 -mindepth 1 -type f
+	)
+	args+=($(file_ext_find_pattern))
+	args+=(-printf '%TY-%Tm-%Td\t%p\0')
+
+	mvopt=(
+		mv -v -u -i --
+	)
+	while IFS=$'\t' read -r -d '' date file; do
+		[ -n "$date" ] && [ -n "$file" ] || continue
+		run_command mkdir -p "$date"
+		run_command "${mvopt[@]}" "$(pwd)/$file" "$(pwd)/$date/"
+	done < <("${args[@]}")
+}
+
+if istrue "$MTIME"; then
+	collect_by_mtime
+else
+	do_all_dates $(find_dates)
+fi
