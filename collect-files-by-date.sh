@@ -8,6 +8,7 @@ Usage: ${0##*/} [OPTION]...
 Collect all pictures or videos into folers named by date.
 
 OPTION:
+    -a,--all      collect all files (default; mutually exclusive with -p/-v).
     -p,--picture  collect pictures.
     -v,--video    collect videos.
     -m,--mtime    use file modification time instead of date in filename.
@@ -23,11 +24,24 @@ require_command find
 workspace="${PARAMS[0]:-.}"
 cd "${workspace}"
 
+if istrue "${PICTURE:-}" || istrue "${VIDEO:-}"; then
+	if istrue "${ALL:-}"; then
+		echo >&2 "option --all is mutually exclusive with --picture/--video"
+		exit 1
+	fi
+	ALL=0
+else
+	ALL=1
+fi
+
 date_pattern='2[0-9]{3}[0-9]{2}[0-9]{2}|2[0-9]{3}-[0-9]{2}-[0-9]{2}'
 
 file_ext_find_pattern() {
 	local exts tmpflag
-    exts=()
+	if istrue "$ALL"; then
+		return
+	fi
+	exts=()
 	if istrue "$PICTURE"; then
 		exts+=(jpg jpeg png gif webp arw heic heif)
 	fi
