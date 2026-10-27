@@ -12,6 +12,7 @@ OPTION:
     -c, --codec   codec to use, default to h264.
     -a, --audio   audio codec to use, default to aac.
     -p, --pix_fmt pix_fmt to use, default to yuv420p.
+    -v, --verbose show full ffmpeg logs.
 "
 
 # shellcheck source=/dev/null
@@ -74,6 +75,11 @@ if istrue "$YES"; then
 	YESOPTION='-y'
 fi
 
+loglevel=(-loglevel warning -stats)
+if istrue "$VERBOSE"; then
+	loglevel=()
+fi
+
 audio_codec() {
 	"$FFPROBE" -v error -select_streams a:0 \
 		-show_entries \
@@ -106,7 +112,7 @@ just_copy() {
 copy_encode() {
 	local args
 	args=(
-		"$FFMPEG" -hide_banner $YESOPTION
+		"$FFMPEG" -hide_banner "${loglevel[@]}" $YESOPTION
 		-i "$1" -map 0
 		# video
 		-c:v copy
@@ -124,7 +130,7 @@ copy_encode() {
 copy_video_encode() {
 	local args
 	args=(
-		"$FFMPEG" -hide_banner $YESOPTION
+		"$FFMPEG" -hide_banner "${loglevel[@]}" $YESOPTION
 		-i "$1" -map 0
 		# video
 		-c:v copy
@@ -142,7 +148,7 @@ copy_video_encode() {
 qsv_encode() {
 	local args
 	args=(
-		"$FFMPEG" -hide_banner $YESOPTION
+		"$FFMPEG" -hide_banner "${loglevel[@]}" $YESOPTION
 		-hwaccel qsv -hwaccel_output_format qsv
 		-i "$1" -map 0
 		# video
@@ -161,7 +167,7 @@ qsv_encode() {
 cude_encode() {
 	local args
 	args=(
-		"$FFMPEG" -hide_banner $YESOPTION
+		"$FFMPEG" -hide_banner "${loglevel[@]}" $YESOPTION
 		-hwaccel cuda
 		-i "$1" -map 0
 		-c:v ${CODEC}_nvenc -cq 20

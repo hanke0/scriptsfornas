@@ -18,6 +18,7 @@ OPTION:
                                      scale:  scale (keep aspect ratio and pad) all videos into one output.
     -s, --size=SIZE                target resolution of scale mode, e.g. 1920x1080
                                    (default to the largest resolution of the videos).
+    -v, --verbose                  show full ffmpeg logs.
 "
 
 # shellcheck source=/dev/null
@@ -57,6 +58,10 @@ if [ -n "$SIZE" ] && ! [[ "$SIZE" =~ ^[0-9]+x[0-9]+$ ]]; then
 	echo >&2 "invalid size: $SIZE"
 	exit 1
 fi
+loglevel=(-loglevel warning -stats)
+if [ -n "$VERBOSE" ]; then
+	loglevel=()
+fi
 
 support_hwaccel() {
 	"$FFMPEG" -hide_banner -hwaccels 2>&1 | grep -q "$1" >/dev/null 2>&1
@@ -83,7 +88,7 @@ simple_concat() {
 		printf "file '%s'\n" "${file//\'/\'\\\'\'}"
 	done >"$filelist"
 
-	vexec "$FFMPEG" -hide_banner "${hwdecode[@]}" \
+	vexec "$FFMPEG" -hide_banner "${loglevel[@]}" "${hwdecode[@]}" \
 		-f concat -safe 0 -i "$filelist" -map 0 \
 		"${vencode[@]}" \
 		-c:a aac -b:a 192k \
@@ -143,7 +148,7 @@ filter_concat() {
 	done
 	filter+="${streams}concat=n=$i:v=1:a=1[v][a]"
 
-	vexec "$FFMPEG" -hide_banner "${inputs[@]}" \
+	vexec "$FFMPEG" -hide_banner "${loglevel[@]}" "${inputs[@]}" \
 		-filter_complex "$filter" -map '[v]' -map '[a]' \
 		-fps_mode vfr \
 		"${vencode[@]}" \
