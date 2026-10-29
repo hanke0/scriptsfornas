@@ -123,38 +123,46 @@ probe_duration() {
 	"$FFPROBE" -v error -show_entries format=duration -of csv=p=0 "$1"
 }
 
-# Concat videos with the concat filter, every video is scaled and padded to the size.
+# Every video is scaled and padded to the size and encoded into a temp file one by one,
+# then the temp files are joined by the concat demuxer without re-encoding,
+# so only one video is decoded at a time.
 # Usage: filter_concat <output> <WIDTHxHEIGHT> <file>...
 filter_concat() {
-	local output="$1" w h file audio i=0 n=0 inputs=() filter="" streams=""
+	local output="$1" w h file audio tmpdir i=0 inputs
 	w="${2%x*}"
 	h="${2#*x}"
 	w=$((w / 2 * 2))
 	h=$((h / 2 * 2))
 	shift 2
+	tmpdir="$(mktemp -d -p . concat-tmp.XXXXXXXXXX)"
+	# shellcheck disable=SC2064
+	trap "rm -rf '$tmpdir'" EXIT
 	for file in "$@"; do
-		inputs+=(-i "$file")
-		filter+="[$n:v:0]scale=$w:$h:force_original_aspect_ratio=decrease,pad=$w:$h:(ow-iw)/2:(oh-ih)/2,setsar=1,format=nv12[v$i];"
-		audio="$n:a:0"
-		n=$((n + 1))
+		i=$((i + 1))
+		echo >&2 "[$i/$#] $file"
+		inputs=(-i "$file")
+		audio="0:a:0"
 		if ! has_audio "$file"; then
 			inputs+=(-f lavfi -t "$(probe_duration "$file")" -i anullsrc=r=48000:cl=stereo)
-			audio="$n:a:0"
-			n=$((n + 1))
+			audio="1:a:0"
 		fi
-		filter+="[$audio]aresample=48000,aformat=sample_fmts=fltp:channel_layouts=stereo[a$i];"
-		streams+="[v$i][a$i]"
-		i=$((i + 1))
+		vexec "$FFMPEG" -hide_banner "${loglevel[@]}" "${inputs[@]}" \
+			-filter_complex "[0:v:0]scale=$w:$h:force_original_aspect_ratio=decrease,pad=$w:$h:(ow-iw)/2:(oh-ih)/2,setsar=1,format=nv12[v];[$audio]aresample=48000,aformat=sample_fmts=fltp:channel_layouts=stereo[a]" \
+			-map '[v]' -map '[a]' \
+			-fps_mode vfr \
+			"${vencode[@]}" \
+			-c:a aac -b:a 192k \
+			-video_track_timescale 90000 \
+			"$tmpdir/$i.mp4"
+		printf "file '%s'\n" "$i.mp4" >>"$tmpdir/filelist.txt"
 	done
-	filter+="${streams}concat=n=$i:v=1:a=1[v][a]"
 
-	vexec "$FFMPEG" -hide_banner "${loglevel[@]}" "${inputs[@]}" \
-		-filter_complex "$filter" -map '[v]' -map '[a]' \
-		-fps_mode vfr \
-		"${vencode[@]}" \
-		-c:a aac -b:a 192k \
+	vexec "$FFMPEG" -hide_banner "${loglevel[@]}" \
+		-f concat -safe 0 -i "$tmpdir/filelist.txt" -map 0 -c copy \
 		-movflags +faststart \
 		"$output"
+	rm -rf "$tmpdir"
+	trap - EXIT
 }
 
 output_name="${OUTPUT#./}"
