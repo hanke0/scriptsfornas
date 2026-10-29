@@ -3,11 +3,12 @@
 set -Eeo pipefail
 
 usage="
-Usage: ${0##*/} [OPTION]... <directory>
-Concat all videos in the directory to a single mp4.
+Usage: ${0##*/} [OPTION]... <directory>...
+Concat all videos in the directories (in the given order) to a single mp4.
 
 OPTION:
-    -o, --output=FILENAME          output file (default to concat-output.mp4).
+    -o, --output=FILENAME          output file, relative to the first directory
+                                   (default to concat-output.mp4).
     -f, --ffmpeg=EXEC              ffmpeg file path (default to ffmpeg).
     -p, --ffprobe=EXEC             ffprobe file path (default to ffprobe).
     -r, --recursive                search recursively.
@@ -28,9 +29,12 @@ getopt_from_usage "$usage" "$@"
 require_basic_commands
 # require_command
 
-DIR="${PARAMS[0]}"
+dirs=(.)
+for dir in "${PARAMS[@]:1}"; do
+	dirs+=("$(realpath -e "$dir")")
+done
 
-cd "$DIR"
+cd "${PARAMS[0]}"
 
 if [ -z "$FFMPEG" ]; then
 	FFMPEG=ffmpeg
@@ -173,7 +177,9 @@ while IFS= read -r -d '' file; do
 	"$output_name" | "${output_name%.*}"-[0-9]*x[0-9]*."${output_name##*.}") continue ;;
 	esac
 	files+=("$file")
-done < <(find . "${depth[@]}" -type f '(' "${video_find_ext[@]}" ')' -print0 | sort -z)
+done < <(for dir in "${dirs[@]}"; do
+	find "$dir" "${depth[@]}" -type f '(' "${video_find_ext[@]}" ')' -print0 | sort -z
+done)
 
 if [ "${#files[@]}" -eq 0 ]; then
 	echo >&2 "no video files found"
