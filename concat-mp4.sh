@@ -46,7 +46,7 @@ if [ -z "$OUTPUT" ]; then
 	OUTPUT="concat-output.mp4"
 fi
 OUTPUT=$(realpath "$OUTPUT")
-if [ -z "$realpath" ]; then
+if [ -z "$OUTPUT" ]; then
 	echo >&2 "invalid output: $OUTPUT"
 	exit 1
 fi
