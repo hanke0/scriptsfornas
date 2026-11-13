@@ -34,8 +34,6 @@ for dir in "${PARAMS[@]:1}"; do
 	dirs+=("$(realpath -e "$dir")")
 done
 
-cd "${PARAMS[0]}"
-
 if [ -z "$FFMPEG" ]; then
 	FFMPEG=ffmpeg
 fi
@@ -46,6 +44,11 @@ fi
 depth=(-maxdepth 1 -mindepth 1)
 if [ -z "$OUTPUT" ]; then
 	OUTPUT="concat-output.mp4"
+fi
+OUTPUT=$(realpath "$OUTPUT")
+if [ -z "$realpath" ]; then
+	echo >&2 "invalid output: $OUTPUT"
+	exit 1
 fi
 if [ -n "$RECURSIVE" ]; then
 	depth=()
